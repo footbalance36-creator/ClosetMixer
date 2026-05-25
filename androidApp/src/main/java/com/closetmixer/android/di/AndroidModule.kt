@@ -1,4 +1,4 @@
-package com.closetmixer.di
+package com.closetmixer.android.di
 
 import com.closetmixer.data.db.DatabaseDriverFactory
 import org.koin.android.ext.koin.androidContext
