@@ -1,6 +1,5 @@
 package com.closetmixer.di
 
-import com.closetmixer.data.db.DatabaseDriverFactory
 import com.closetmixer.data.remote.WeatherApi
 import com.closetmixer.data.repository.ArticleRepository
 import com.closetmixer.data.repository.TenueRepository
@@ -37,7 +36,7 @@ val sharedModule = module {
         }
     }
 
-    single { DatabaseDriverFactory(get()).createDriver() }
+    // SqlDriver is provided by platform-specific modules (androidModule / iosModule)
     single { ClosetDatabase(get()) }
 
     single { WeatherApi(get()) }

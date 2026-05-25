@@ -1,6 +1,7 @@
 package com.closetmixer.android
 
 import android.app.Application
+import com.closetmixer.di.androidModule
 import com.closetmixer.di.sharedModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -10,7 +11,7 @@ class ClosetMixerApp : Application() {
         super.onCreate()
         startKoin {
             androidContext(this@ClosetMixerApp)
-            modules(sharedModule)
+            modules(androidModule, sharedModule)
         }
     }
 }
