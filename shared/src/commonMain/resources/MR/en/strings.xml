@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ClosetMixer</string>
+    <string name="wardrobe">Wardrobe</string>
+    <string name="outfits">Outfits</string>
+    <string name="calendar">Calendar</string>
+    <string name="voyage">Travel</string>
+    <string name="stats">Statistics</string>
+    <string name="settings">Settings</string>
+    <string name="add_article">Add item</string>
+    <string name="generate_outfit">Generate outfit</string>
+    <string name="favorites">Favorites</string>
+    <string name="all_categories">All categories</string>
+    <string name="premium_title">ClosetMixer Premium</string>
+    <string name="language">Language</string>
+    <string name="cultural_style">Cultural style</string>
+</resources>

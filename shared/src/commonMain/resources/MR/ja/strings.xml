@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ClosetMixer</string>
+    <string name="wardrobe">クローゼット</string>
+    <string name="outfits">コーデ</string>
+    <string name="calendar">カレンダー</string>
+    <string name="voyage">旅行</string>
+    <string name="stats">統計</string>
+    <string name="settings">設定</string>
+    <string name="add_article">アイテム追加</string>
+    <string name="generate_outfit">コーデ生成</string>
+    <string name="favorites">お気に入り</string>
+    <string name="all_categories">すべてのカテゴリ</string>
+    <string name="premium_title">ClosetMixer プレミアム</string>
+    <string name="language">言語</string>
+    <string name="cultural_style">カルチャースタイル</string>
+</resources>

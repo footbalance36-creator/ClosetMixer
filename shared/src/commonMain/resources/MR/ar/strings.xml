@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ClosetMixer</string>
+    <string name="wardrobe">خزانة الملابس</string>
+    <string name="outfits">الأزياء</string>
+    <string name="calendar">التقويم</string>
+    <string name="voyage">السفر</string>
+    <string name="stats">الإحصائيات</string>
+    <string name="settings">الإعدادات</string>
+    <string name="add_article">إضافة قطعة</string>
+    <string name="generate_outfit">توليد زي</string>
+    <string name="favorites">المفضلة</string>
+    <string name="all_categories">جميع الفئات</string>
+    <string name="premium_title">ClosetMixer Premium</string>
+    <string name="language">اللغة</string>
+    <string name="cultural_style">الأسلوب الثقافي</string>
+</resources>
