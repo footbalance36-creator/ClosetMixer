@@ -16,17 +16,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.closetmixer.presentation.viewmodel.CalendarViewModel
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.koin.androidx.compose.koinViewModel
+import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarScreen(viewModel: CalendarViewModel = koinViewModel()) {
     val state by viewModel.uiState.collectAsState()
-    val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-    val currentMonth = "${now.year}-${now.monthNumber.toString().padStart(2, '0')}"
+    val now = LocalDate.now()
+    val currentMonth = "${now.year}-${now.monthValue.toString().padStart(2, '0')}"
 
     LaunchedEffect(Unit) { viewModel.loadMonth(currentMonth) }
 
