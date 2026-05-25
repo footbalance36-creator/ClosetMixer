@@ -16,12 +16,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.closetmixer.presentation.viewmodel.CalendarViewModel
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CalendarScreen(viewModel: CalendarViewModel = koinViewModel()) {
+fun CalendarScreen(viewModel: CalendarViewModel = koinInject()) {
     val state by viewModel.uiState.collectAsState()
     val now = LocalDate.now()
     val currentMonth = "${now.year}-${now.monthValue.toString().padStart(2, '0')}"

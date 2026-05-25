@@ -1,5 +1,6 @@
 package com.closetmixer.di
 
+import app.cash.sqldelight.db.SqlDriver
 import com.closetmixer.data.remote.WeatherApi
 import com.closetmixer.data.repository.ArticleRepository
 import com.closetmixer.data.repository.TenueRepository
@@ -35,8 +36,8 @@ val sharedModule = module {
         }
     }
 
-    // SqlDriver is provided by platform-specific modules (androidModule / iosModule)
-    single { ClosetDatabase(get()) }
+    // SqlDriver registered explicitly by platform module (androidModule / iosModule)
+    single { ClosetDatabase(get<SqlDriver>()) }
 
     single { WeatherApi(get()) }
     single { ArticleRepository(get()) }
@@ -50,10 +51,11 @@ val sharedModule = module {
     factory { PlanOutfitUseCase(get()) }
     factory { GetStatsUseCase(get()) }
 
-    factory { WardrobeViewModel(get()) }
-    factory { OutfitViewModel(get(), get()) }
-    factory { CalendarViewModel(get(), get()) }
-    factory { VoyageViewModel(get()) }
-    factory { StatsViewModel(get()) }
-    factory { SettingsViewModel() }
+    // singles so each screen gets the same instance (no AndroidX ViewModel used)
+    single { WardrobeViewModel(get()) }
+    single { OutfitViewModel(get(), get()) }
+    single { CalendarViewModel(get(), get()) }
+    single { VoyageViewModel(get()) }
+    single { StatsViewModel(get()) }
+    single { SettingsViewModel() }
 }

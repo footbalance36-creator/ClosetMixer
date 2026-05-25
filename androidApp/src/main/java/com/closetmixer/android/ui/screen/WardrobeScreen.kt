@@ -25,11 +25,11 @@ import androidx.compose.ui.unit.dp
 import com.closetmixer.android.ui.component.ArticleCard
 import com.closetmixer.android.ui.component.CategoryChips
 import com.closetmixer.presentation.viewmodel.WardrobeViewModel
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WardrobeScreen(viewModel: WardrobeViewModel = koinViewModel()) {
+fun WardrobeScreen(viewModel: WardrobeViewModel = koinInject()) {
     val state by viewModel.uiState.collectAsState()
 
     Scaffold(

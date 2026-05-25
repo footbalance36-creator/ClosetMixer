@@ -17,11 +17,11 @@ import androidx.compose.ui.Modifier
 import com.closetmixer.domain.model.AppLanguage
 import com.closetmixer.domain.model.CulturalStyle
 import com.closetmixer.presentation.viewmodel.SettingsViewModel
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel = koinViewModel()) {
+fun SettingsScreen(viewModel: SettingsViewModel = koinInject()) {
     val state by viewModel.uiState.collectAsState()
 
     Scaffold(

@@ -21,11 +21,11 @@ import androidx.compose.ui.unit.dp
 import com.closetmixer.android.ui.component.OutfitRow
 import com.closetmixer.android.ui.component.WeatherBanner
 import com.closetmixer.presentation.viewmodel.OutfitViewModel
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OutfitScreen(viewModel: OutfitViewModel = koinViewModel()) {
+fun OutfitScreen(viewModel: OutfitViewModel = koinInject()) {
     val state by viewModel.uiState.collectAsState()
 
     Scaffold(

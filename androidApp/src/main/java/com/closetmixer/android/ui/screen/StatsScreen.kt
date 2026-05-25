@@ -19,11 +19,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.closetmixer.presentation.viewmodel.StatsViewModel
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StatsScreen(viewModel: StatsViewModel = koinViewModel()) {
+fun StatsScreen(viewModel: StatsViewModel = koinInject()) {
     val state by viewModel.uiState.collectAsState()
 
     Scaffold(
