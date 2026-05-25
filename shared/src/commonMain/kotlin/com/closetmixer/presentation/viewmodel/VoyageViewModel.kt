@@ -2,7 +2,6 @@ package com.closetmixer.presentation.viewmodel
 
 import com.closetmixer.data.model.Article
 import com.closetmixer.data.model.Voyage
-import com.closetmixer.data.repository.TenueRepository
 import com.closetmixer.db.ClosetDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

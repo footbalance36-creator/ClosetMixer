@@ -20,8 +20,8 @@ data class CalendarUiState(
 )
 
 class CalendarViewModel(
-    private val planOutfit: PlanOutfitUseCase,
-    private val getWeather: GetWeatherUseCase
+    private val planOutfitUseCase: PlanOutfitUseCase,
+    private val getWeatherUseCase: GetWeatherUseCase
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val _uiState = MutableStateFlow(CalendarUiState())
@@ -30,7 +30,7 @@ class CalendarViewModel(
     fun loadMonth(yearMonth: String) {
         scope.launch {
             _uiState.update { it.copy(isLoading = true, currentMonth = yearMonth) }
-            val entries = planOutfit.getMonthEntries(yearMonth).associateBy { it.date }
+            val entries = planOutfitUseCase.getMonthEntries(yearMonth).associateBy { it.date }
             _uiState.update { it.copy(entries = entries, isLoading = false) }
         }
     }
@@ -39,9 +39,9 @@ class CalendarViewModel(
         _uiState.update { it.copy(selectedDate = date) }
     }
 
-    fun planOutfit(date: String, tenueId: String) {
+    fun savePlannedOutfit(date: String, tenueId: String) {
         scope.launch {
-            planOutfit.execute(date, tenueId)
+            planOutfitUseCase.execute(date, tenueId)
             loadMonth(_uiState.value.currentMonth)
         }
     }
