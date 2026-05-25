@@ -67,3 +67,6 @@ sqldelight {
 multiplatformResources {
     resourcesPackage.set("com.closetmixer")
 }
+
+// Android Studio requests this task on KMP modules but it doesn't exist by default
+tasks.register("testClasses")
