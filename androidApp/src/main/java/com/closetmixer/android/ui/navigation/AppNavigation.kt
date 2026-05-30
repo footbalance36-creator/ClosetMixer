@@ -6,7 +6,7 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Checkroom
 import androidx.compose.material.icons.filled.FlightTakeoff
 import androidx.compose.material.icons.filled.Inventory2
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -21,6 +21,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.closetmixer.android.ui.screen.AddArticleScreen
 import com.closetmixer.android.ui.screen.CalendarScreen
 import com.closetmixer.android.ui.screen.OutfitScreen
 import com.closetmixer.android.ui.screen.SettingsScreen
@@ -35,43 +36,52 @@ sealed class Screen(val route: String, val label: String) {
     object Voyage : Screen("voyage", "Voyage")
     object Stats : Screen("stats", "Stats")
     object Settings : Screen("settings", "Paramètres")
+    object AddArticle : Screen("add_article", "Ajouter")
 }
+
+private val bottomItems = listOf(
+    Screen.Wardrobe, Screen.Outfit, Screen.Calendar, Screen.Voyage, Screen.Stats
+)
 
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = navBackStackEntry?.destination
-
-    val bottomItems = listOf(Screen.Wardrobe, Screen.Outfit, Screen.Calendar, Screen.Voyage, Screen.Stats)
+    val currentRoute = navBackStackEntry?.destination?.route
+    val showBottomBar = currentRoute in bottomItems.map { it.route }
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                bottomItems.forEach { screen ->
-                    NavigationBarItem(
-                        icon = {
-                            Icon(
-                                imageVector = when (screen) {
-                                    Screen.Wardrobe -> Icons.Default.Inventory2
-                                    Screen.Outfit -> Icons.Default.Checkroom
-                                    Screen.Calendar -> Icons.Default.CalendarMonth
-                                    Screen.Voyage -> Icons.Default.FlightTakeoff
-                                    else -> Icons.Default.Settings
-                                },
-                                contentDescription = screen.label
-                            )
-                        },
-                        label = { Text(screen.label) },
-                        selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
-                        onClick = {
-                            navController.navigate(screen.route) {
-                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
+            if (showBottomBar) {
+                NavigationBar {
+                    bottomItems.forEach { screen ->
+                        NavigationBarItem(
+                            icon = {
+                                Icon(
+                                    imageVector = when (screen) {
+                                        Screen.Wardrobe -> Icons.Default.Inventory2
+                                        Screen.Outfit -> Icons.Default.Checkroom
+                                        Screen.Calendar -> Icons.Default.CalendarMonth
+                                        Screen.Voyage -> Icons.Default.FlightTakeoff
+                                        else -> Icons.Default.BarChart
+                                    },
+                                    contentDescription = screen.label
+                                )
+                            },
+                            label = { Text(screen.label) },
+                            selected = navBackStackEntry?.destination?.hierarchy
+                                ?.any { it.route == screen.route } == true,
+                            onClick = {
+                                navController.navigate(screen.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }
@@ -81,12 +91,19 @@ fun AppNavigation() {
             startDestination = Screen.Wardrobe.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(Screen.Wardrobe.route) { WardrobeScreen() }
+            composable(Screen.Wardrobe.route) {
+                WardrobeScreen(
+                    onAddClick = { navController.navigate(Screen.AddArticle.route) }
+                )
+            }
             composable(Screen.Outfit.route) { OutfitScreen() }
             composable(Screen.Calendar.route) { CalendarScreen() }
             composable(Screen.Voyage.route) { VoyageScreen() }
             composable(Screen.Stats.route) { StatsScreen() }
             composable(Screen.Settings.route) { SettingsScreen() }
+            composable(Screen.AddArticle.route) {
+                AddArticleScreen(onNavigateBack = { navController.popBackStack() })
+            }
         }
     }
 }

@@ -3,6 +3,7 @@ package com.closetmixer.presentation.viewmodel
 import com.closetmixer.data.model.Article
 import com.closetmixer.data.repository.ArticleRepository
 import com.closetmixer.domain.model.ArticleCategory
+import com.closetmixer.domain.usecase.AddArticleUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -19,8 +20,10 @@ data class WardrobeUiState(
     val error: String? = null
 )
 
-class WardrobeViewModel(private val articleRepo: ArticleRepository) {
-
+class WardrobeViewModel(
+    private val articleRepo: ArticleRepository,
+    private val addArticleUseCase: AddArticleUseCase
+) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val _uiState = MutableStateFlow(WardrobeUiState())
     val uiState: StateFlow<WardrobeUiState> = _uiState.asStateFlow()
@@ -37,6 +40,36 @@ class WardrobeViewModel(private val articleRepo: ArticleRepository) {
                 _uiState.update { it.copy(articles = articles, isLoading = false) }
             }.onFailure { e ->
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    fun addArticle(
+        id: String,
+        photoPath: String,
+        categorie: String,
+        sousCategorie: String,
+        couleur: String?,
+        metal: String?,
+        culture: String,
+        onDone: () -> Unit
+    ) {
+        scope.launch {
+            runCatching {
+                addArticleUseCase.execute(
+                    id = id,
+                    photoPath = photoPath,
+                    categorie = categorie,
+                    sousCategorie = sousCategorie,
+                    couleur = couleur,
+                    metal = metal,
+                    culture = culture
+                )
+            }.onSuccess {
+                loadArticles(_uiState.value.selectedCategory)
+                onDone()
+            }.onFailure { e ->
+                _uiState.update { it.copy(error = e.message) }
             }
         }
     }

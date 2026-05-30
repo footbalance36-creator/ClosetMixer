@@ -62,6 +62,7 @@ dependencies {
     // AndroidX
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.splashscreen)
 
     // Moko
     implementation(libs.moko.resources.compose)

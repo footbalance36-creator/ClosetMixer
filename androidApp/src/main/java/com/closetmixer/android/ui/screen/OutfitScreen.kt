@@ -1,6 +1,7 @@
 package com.closetmixer.android.ui.screen
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -19,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.closetmixer.android.ui.component.OutfitRow
-import com.closetmixer.android.ui.component.WeatherBanner
 import com.closetmixer.presentation.viewmodel.OutfitViewModel
 import org.koin.compose.koinInject
 
@@ -39,24 +40,39 @@ fun OutfitScreen(viewModel: OutfitViewModel = koinInject()) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            state.weather?.let { WeatherBanner(weather = it) }
+            Spacer(Modifier.height(8.dp))
 
-            if (state.isLoading) {
-                CircularProgressIndicator()
-            } else {
-                state.generatedOutfit?.let { outfit ->
+            when {
+                state.isLoading -> CircularProgressIndicator()
+                state.generatedOutfit != null -> {
+                    Text("Tenue générée", style = MaterialTheme.typography.titleMedium)
+                    val outfit = state.generatedOutfit!!
                     OutfitRow(
                         articles = listOf(
                             outfit.haut, outfit.bas, outfit.chaussure,
                             outfit.bijou, outfit.couvreChef
                         )
                     )
+                    outfit.haut?.let { Text("Haut : ${it.sousCategorie} ${it.couleur ?: ""}") }
+                    outfit.bas?.let { Text("Bas : ${it.sousCategorie} ${it.couleur ?: ""}") }
+                    outfit.chaussure?.let { Text("Chaussures : ${it.sousCategorie} ${it.couleur ?: ""}") }
+                    outfit.bijou?.let { Text("Bijou : ${it.sousCategorie}") }
+                }
+                else -> {
+                    Spacer(Modifier.weight(1f))
+                    Text(
+                        "Appuyez sur le bouton pour générer une tenue",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.weight(1f))
                 }
             }
 
-            Spacer(Modifier.height(8.dp))
-
-            Button(onClick = { viewModel.generate(state.culturalStyle) }) {
+            Button(
+                onClick = { viewModel.generate(state.culturalStyle) },
+                modifier = Modifier.padding(bottom = 16.dp)
+            ) {
                 Text("Générer une tenue")
             }
         }

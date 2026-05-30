@@ -52,7 +52,7 @@ val sharedModule = module {
     factory { GetStatsUseCase(get()) }
 
     // singles so each screen gets the same instance (no AndroidX ViewModel used)
-    single { WardrobeViewModel(get()) }
+    single { WardrobeViewModel(get(), get()) }
     single { OutfitViewModel(get(), get()) }
     single { CalendarViewModel(get(), get()) }
     single { VoyageViewModel(get()) }
