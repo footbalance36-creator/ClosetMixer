@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ClosetMixer</string>
+    <string name="wardrobe">Dolap</string>
+    <string name="outfits">Kombiner</string>
+    <string name="calendar">Takvim</string>
+    <string name="voyage">Seyahat</string>
+    <string name="stats">İstatistikler</string>
+    <string name="settings">Ayarlar</string>
+    <string name="add_article">Parça ekle</string>
+    <string name="generate_outfit">Kombin oluştur</string>
+    <string name="favorites">Favoriler</string>
+    <string name="all_categories">Tüm kategoriler</string>
+    <string name="premium_title">ClosetMixer Premium</string>
+    <string name="language">Dil</string>
+    <string name="cultural_style">Kültürel stil</string>
+</resources>

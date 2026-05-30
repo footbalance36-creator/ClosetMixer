@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ClosetMixer</string>
+    <string name="wardrobe">Lemari</string>
+    <string name="outfits">Pakaian</string>
+    <string name="calendar">Kalender</string>
+    <string name="voyage">Perjalanan</string>
+    <string name="stats">Statistik</string>
+    <string name="settings">Pengaturan</string>
+    <string name="add_article">Tambah pakaian</string>
+    <string name="generate_outfit">Buat outfit</string>
+    <string name="favorites">Favorit</string>
+    <string name="all_categories">Semua kategori</string>
+    <string name="premium_title">ClosetMixer Premium</string>
+    <string name="language">Bahasa</string>
+    <string name="cultural_style">Gaya budaya</string>
+</resources>

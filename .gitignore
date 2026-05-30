@@ -1,0 +1,43 @@
+# Gradle
+.gradle/
+build/
+local.properties
+*.local.properties
+
+# Android Studio
+.idea/
+*.iml
+*.iws
+*.ipr
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Xcode
+iosApp/*.xcworkspace/xcuserdata/
+iosApp/*.xcodeproj/xcuserdata/
+iosApp/Pods/
+iosApp/.swiftpm/
+iosApp/iosApp.xcworkspace/
+
+# KMP / Kotlin
+kotlin-js-store/
+.kotlin/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+*.env
+local.properties
+
+# Build outputs
+*.apk
+*.aar
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# SQLDelight generated
+**/generated/

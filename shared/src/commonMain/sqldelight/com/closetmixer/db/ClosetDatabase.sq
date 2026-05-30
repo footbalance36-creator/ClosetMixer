@@ -1,0 +1,153 @@
+CREATE TABLE Article (
+    id TEXT PRIMARY KEY NOT NULL,
+    photoPath TEXT NOT NULL,
+    categorie TEXT NOT NULL,
+    sousCategorie TEXT NOT NULL,
+    couleur TEXT,
+    metal TEXT,
+    tags TEXT NOT NULL DEFAULT '[]',
+    culture TEXT NOT NULL DEFAULT 'neutral',
+    dateAjout INTEGER NOT NULL,
+    nbUtilisations INTEGER NOT NULL DEFAULT 0,
+    isFavori INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE Tenue (
+    id TEXT PRIMARY KEY NOT NULL,
+    nom TEXT NOT NULL,
+    occasion TEXT,
+    saison TEXT,
+    isFavori INTEGER NOT NULL DEFAULT 0,
+    dateCreation INTEGER NOT NULL,
+    datePortee INTEGER
+);
+
+CREATE TABLE TenueArticle (
+    tenueId TEXT NOT NULL,
+    articleId TEXT NOT NULL,
+    FOREIGN KEY (tenueId) REFERENCES Tenue(id) ON DELETE CASCADE,
+    FOREIGN KEY (articleId) REFERENCES Article(id) ON DELETE CASCADE,
+    PRIMARY KEY (tenueId, articleId)
+);
+
+CREATE TABLE CalendarEntry (
+    date TEXT PRIMARY KEY NOT NULL,
+    tenueId TEXT NOT NULL,
+    meteo TEXT,
+    temperature REAL,
+    FOREIGN KEY (tenueId) REFERENCES Tenue(id) ON DELETE CASCADE
+);
+
+CREATE TABLE Voyage (
+    id TEXT PRIMARY KEY NOT NULL,
+    nom TEXT NOT NULL,
+    destination TEXT,
+    dateDebut TEXT,
+    dateFin TEXT,
+    dateCreation INTEGER NOT NULL
+);
+
+CREATE TABLE VoyageArticle (
+    voyageId TEXT NOT NULL,
+    articleId TEXT NOT NULL,
+    FOREIGN KEY (voyageId) REFERENCES Voyage(id) ON DELETE CASCADE,
+    FOREIGN KEY (articleId) REFERENCES Article(id) ON DELETE CASCADE,
+    PRIMARY KEY (voyageId, articleId)
+);
+
+-- Queries Articles
+getAllArticles:
+SELECT * FROM Article ORDER BY dateAjout DESC;
+
+getArticlesByCategory:
+SELECT * FROM Article WHERE categorie = ? ORDER BY dateAjout DESC;
+
+getArticlesBySubCategory:
+SELECT * FROM Article WHERE sousCategorie = ? ORDER BY dateAjout DESC;
+
+getFavoriteArticles:
+SELECT * FROM Article WHERE isFavori = 1;
+
+getMostUsedArticles:
+SELECT * FROM Article ORDER BY nbUtilisations DESC LIMIT 10;
+
+getNeverUsedArticles:
+SELECT * FROM Article WHERE nbUtilisations = 0;
+
+insertArticle:
+INSERT INTO Article(id, photoPath, categorie, sousCategorie, couleur, metal, tags, culture, dateAjout, nbUtilisations, isFavori)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0);
+
+updateArticleFavori:
+UPDATE Article SET isFavori = ? WHERE id = ?;
+
+incrementUsage:
+UPDATE Article SET nbUtilisations = nbUtilisations + 1 WHERE id = ?;
+
+deleteArticle:
+DELETE FROM Article WHERE id = ?;
+
+-- Queries Tenues
+getAllTenues:
+SELECT * FROM Tenue ORDER BY dateCreation DESC;
+
+getFavoriteTenues:
+SELECT * FROM Tenue WHERE isFavori = 1;
+
+getArticlesForTenue:
+SELECT a.* FROM Article a
+INNER JOIN TenueArticle ta ON a.id = ta.articleId
+WHERE ta.tenueId = ?;
+
+insertTenue:
+INSERT INTO Tenue(id, nom, occasion, saison, isFavori, dateCreation)
+VALUES (?, ?, ?, ?, 0, ?);
+
+updateTenueFavori:
+UPDATE Tenue SET isFavori = ? WHERE id = ?;
+
+insertTenueArticle:
+INSERT INTO TenueArticle(tenueId, articleId) VALUES (?, ?);
+
+deleteTenue:
+DELETE FROM Tenue WHERE id = ?;
+
+-- Queries Voyage
+getAllVoyages:
+SELECT * FROM Voyage ORDER BY dateCreation DESC;
+
+insertVoyage:
+INSERT INTO Voyage(id, nom, destination, dateDebut, dateFin, dateCreation)
+VALUES (?, ?, ?, ?, ?, ?);
+
+getArticlesForVoyage:
+SELECT a.* FROM Article a
+INNER JOIN VoyageArticle va ON a.id = va.articleId
+WHERE va.voyageId = ?;
+
+insertVoyageArticle:
+INSERT INTO VoyageArticle(voyageId, articleId) VALUES (?, ?);
+
+deleteVoyage:
+DELETE FROM Voyage WHERE id = ?;
+
+-- Queries Calendrier
+getCalendarEntry:
+SELECT * FROM CalendarEntry WHERE date = ?;
+
+getMonthEntries:
+SELECT * FROM CalendarEntry WHERE date LIKE ? ORDER BY date;
+
+insertCalendarEntry:
+INSERT OR REPLACE INTO CalendarEntry(date, tenueId, meteo, temperature)
+VALUES (?, ?, ?, ?);
+
+-- Queries Stats
+countArticlesByCategory:
+SELECT categorie, COUNT(*) AS count FROM Article GROUP BY categorie;
+
+countTotalTenues:
+SELECT COUNT(*) FROM Tenue;
+
+countNeverUsed:
+SELECT COUNT(*) FROM Article WHERE nbUtilisations = 0;
