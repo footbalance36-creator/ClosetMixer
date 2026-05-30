@@ -1,88 +1,156 @@
 package com.closetmixer.android.ui.screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Card
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.closetmixer.presentation.viewmodel.StatsViewModel
 import org.koin.compose.koinInject
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatsScreen(viewModel: StatsViewModel = koinInject()) {
     val state by viewModel.uiState.collectAsState()
 
-    Scaffold(
-        topBar = { TopAppBar(title = { Text("Statistiques") }) }
-    ) { padding ->
+    Scaffold { padding ->
         when {
             state.isLoading -> Box(
                 Modifier.fillMaxSize().padding(padding),
                 contentAlignment = Alignment.Center
-            ) { CircularProgressIndicator() }
+            ) { CircularProgressIndicator(color = MaterialTheme.colorScheme.primary) }
 
             state.stats != null -> {
                 val stats = state.stats!!
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                        .padding(horizontal = 20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
+                    item {
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            "Style Insights",
+                            style = MaterialTheme.typography.headlineSmall
+                        )
+                        Text(
+                            "Un aperçu curé de votre évolution vestimentaire.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.height(8.dp))
+                    }
+
+                    // KPI bento row
                     item {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            StatCard("Tenues", stats.totalTenues.toString(), Modifier.weight(1f))
-                            StatCard("Jamais portés", stats.neverUsedCount.toString(), Modifier.weight(1f))
-                        }
-                    }
-                    item {
-                        Text("Par catégorie", style = MaterialTheme.typography.titleMedium)
-                        HorizontalDivider()
-                    }
-                    if (stats.articlesByCategory.isEmpty()) {
-                        item {
-                            Text(
-                                "Aucun article",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                style = MaterialTheme.typography.bodyMedium
+                            StitchStatCard(
+                                value = stats.totalTenues.toString(),
+                                label = "Tenues",
+                                modifier = Modifier.weight(1f)
+                            )
+                            StitchStatCard(
+                                value = stats.neverUsedCount.toString(),
+                                label = "Jamais portés",
+                                modifier = Modifier.weight(1f)
                             )
                         }
-                    } else {
-                        stats.articlesByCategory.forEach { (cat, count) ->
-                            item {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(cat, style = MaterialTheme.typography.bodyMedium)
-                                    Text(
-                                        count.toString(),
-                                        style = MaterialTheme.typography.labelLarge,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
+                    }
+
+                    // Category breakdown
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                                .padding(16.dp)
+                        ) {
+                            Text(
+                                "RÉPARTITION PAR CATÉGORIE",
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    letterSpacing = 1.2.sp, fontSize = 11.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.70f)
+                            )
+                            Spacer(Modifier.height(12.dp))
+
+                            if (stats.articlesByCategory.isEmpty()) {
+                                Text(
+                                    "Aucun article",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Center
+                                )
+                            } else {
+                                val total = stats.articlesByCategory.values.sum().coerceAtLeast(1L)
+                                stats.articlesByCategory.entries.forEachIndexed { idx, (cat, count) ->
+                                    if (idx > 0) {
+                                        HorizontalDivider(
+                                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                                            modifier = Modifier.padding(vertical = 8.dp)
+                                        )
+                                    }
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            cat.replaceFirstChar { it.uppercase() },
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            // Thin progress bar
+                                            Box(
+                                                modifier = Modifier
+                                                    .height(4.dp)
+                                                    .fillMaxWidth(fraction = (count.toFloat() / total.toFloat()) * 0.5f)
+                                                    .clip(RoundedCornerShape(2.dp))
+                                                    .background(MaterialTheme.colorScheme.primaryContainer)
+                                            )
+                                            Text(
+                                                count.toString(),
+                                                style = MaterialTheme.typography.labelLarge,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
+
+                    item { Spacer(Modifier.height(16.dp)) }
                 }
             }
 
@@ -90,18 +158,34 @@ fun StatsScreen(viewModel: StatsViewModel = koinInject()) {
                 Modifier.fillMaxSize().padding(padding),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Impossible de charger les statistiques", color = MaterialTheme.colorScheme.error)
+                Text(
+                    "Impossible de charger les statistiques",
+                    color = MaterialTheme.colorScheme.error,
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }
 }
 
 @Composable
-private fun StatCard(label: String, value: String, modifier: Modifier = Modifier) {
-    Card(modifier = modifier) {
-        Column(Modifier.padding(16.dp)) {
-            Text(value, style = MaterialTheme.typography.headlineMedium)
-            Text(label, style = MaterialTheme.typography.bodySmall)
-        }
+private fun StitchStatCard(label: String, value: String, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f))
+            .padding(20.dp)
+    ) {
+        Text(
+            value,
+            style = MaterialTheme.typography.headlineLarge,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }

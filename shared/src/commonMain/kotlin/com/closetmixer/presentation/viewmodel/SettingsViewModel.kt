@@ -10,7 +10,8 @@ import kotlinx.coroutines.flow.update
 data class SettingsUiState(
     val language: AppLanguage = AppLanguage.FRENCH,
     val culturalStyle: CulturalStyle = CulturalStyle.NEUTRAL,
-    val isDarkMode: Boolean = false
+    val isDarkMode: Boolean = false,
+    val profilePhotoPath: String = ""
 )
 
 class SettingsViewModel {
@@ -28,5 +29,9 @@ class SettingsViewModel {
 
     fun toggleDarkMode() {
         _uiState.update { it.copy(isDarkMode = !it.isDarkMode) }
+    }
+
+    fun setProfilePhoto(path: String) {
+        _uiState.update { it.copy(profilePhotoPath = path) }
     }
 }
