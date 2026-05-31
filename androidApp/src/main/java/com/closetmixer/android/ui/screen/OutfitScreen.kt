@@ -1,5 +1,11 @@
 package com.closetmixer.android.ui.screen
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.location.LocationManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -27,6 +33,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,9 +46,11 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import com.closetmixer.android.ui.component.StitchChip
 import com.closetmixer.android.ui.component.WeatherBanner
@@ -56,9 +65,25 @@ private val occasions = listOf("Travail", "Casual", "Soirée", "Voyage", "Sport"
 @Composable
 fun OutfitScreen(viewModel: OutfitViewModel = koinInject()) {
     val state by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     var selectedStyle by remember { mutableStateOf(culturalStyles.first()) }
     var selectedOccasion by remember { mutableStateOf(occasions[1]) }
+
+    val locationLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) fetchAndLoadWeather(context, viewModel)
+    }
+
+    LaunchedEffect(Unit) {
+        val hasPermission = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (hasPermission) fetchAndLoadWeather(context, viewModel)
+        else locationLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+    }
 
     Scaffold { padding ->
         Column(
@@ -247,6 +272,15 @@ fun OutfitScreen(viewModel: OutfitViewModel = koinInject()) {
             Spacer(Modifier.height(32.dp))
         }
     }
+}
+
+@android.annotation.SuppressLint("MissingPermission")
+private fun fetchAndLoadWeather(context: Context, viewModel: OutfitViewModel) {
+    val lm = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    val location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+        ?: lm.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+        ?: lm.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER)
+    location?.let { viewModel.loadWeather(it.latitude, it.longitude) }
 }
 
 @Composable
