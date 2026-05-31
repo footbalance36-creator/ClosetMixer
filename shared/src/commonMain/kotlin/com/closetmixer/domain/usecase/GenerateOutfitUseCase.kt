@@ -18,11 +18,13 @@ class GenerateOutfitUseCase(private val articleRepo: ArticleRepository) {
 
         val haut = allArticles.filter {
             it.categorie == ArticleCategory.VETEMENT.key &&
-                it.sousCategorie in listOf("haut", "robe", "abaya", "kimono", "hanbok")
+                it.sousCategorie in listOf("haut", "chemise", "pull", "robe", "abaya", "kimono", "hanbok")
         }.randomOrNull()
 
         val bas = if (haut?.sousCategorie in listOf("robe", "abaya")) null
-        else allArticles.filter { it.sousCategorie == "bas" }.randomOrNull()
+        else allArticles.filter {
+            it.sousCategorie in listOf("bas", "pantalon", "jupe", "short")
+        }.randomOrNull()
 
         val chaussure = allArticles.filter { it.categorie == ArticleCategory.CHAUSSURE.key }
             .let { list ->
