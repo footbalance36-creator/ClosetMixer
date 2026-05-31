@@ -177,7 +177,8 @@ fun WardrobeScreen(
                     items(state.articles) { article ->
                         ArticleCard(
                             article = article,
-                            onFavoriteClick = { viewModel.toggleFavorite(article.id) }
+                            onFavoriteClick = { viewModel.toggleFavorite(article.id) },
+                            onDeleteClick = { viewModel.deleteArticle(article.id) }
                         )
                     }
                 }
