@@ -57,5 +57,5 @@ val sharedModule = module {
     single { CalendarViewModel(get(), get()) }
     single { VoyageViewModel(get()) }
     single { StatsViewModel(get()) }
-    single { SettingsViewModel() }
+    single { SettingsViewModel(get()) }
 }
