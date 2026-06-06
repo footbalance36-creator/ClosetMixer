@@ -32,6 +32,19 @@ Thumbs.db
 *.env
 local.properties
 
+# Fastlane secrets & generated reports
+fastlane/play-store-credentials.json
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+Gemfile.lock
+
+# Keystore
+keystore/
+*.jks
+*.keystore
+
 # Build outputs
 *.apk
 *.aar
@@ -41,3 +54,10 @@ local.properties
 
 # SQLDelight generated
 **/generated/
+
+# Build artifacts
+androidApp/release/
+
+# Sensitive files
+spec/*.json
+spec/keystore_base64.txt

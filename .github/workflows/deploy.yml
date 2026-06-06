@@ -1,0 +1,55 @@
+name: Deploy to Play Store
+
+on:
+  push:
+    branches: [main]           # deploy automatique sur chaque merge dans main
+  workflow_dispatch:           # ou manuellement depuis GitHub
+    inputs:
+      track:
+        description: "Track Play Store"
+        required: true
+        default: "internal"
+        type: choice
+        options: [internal, alpha, beta, production]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true   # installe Fastlane depuis le Gemfile automatiquement
+
+      - name: Decode keystore
+        run: |
+          mkdir -p keystore
+          echo "${{ secrets.closemixer }}" | base64 --decode > keystore/release.jks
+
+      - name: Write Play Store credentials
+        run: echo '${{ secrets.PLAY_STORE_JSON }}' > fastlane/play-store-credentials.json
+
+      - name: Deploy
+        env:
+          KEYSTORE_PATH: keystore/release.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          TRACK="${{ github.event.inputs.track || 'internal' }}"
+          if [ "$TRACK" = "internal" ]; then
+            bundle exec fastlane ship_internal
+          else
+            bundle exec fastlane deploy_$TRACK
+          fi

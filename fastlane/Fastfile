@@ -1,0 +1,90 @@
+default_platform(:android)
+
+platform :android do
+
+  # ── Helpers ──────────────────────────────────────────────────────────────
+
+  def gradle_aab
+    gradle(
+      task:            "bundle",
+      build_type:      "Release",
+      project_dir:     ".",
+      flags:           "--stacktrace"
+    )
+  end
+
+  def aab_path
+    "androidApp/release/androidApp-release.aab"
+  end
+
+  # ── Lanes ─────────────────────────────────────────────────────────────────
+
+  desc "Run unit tests"
+  lane :test do
+    gradle(task: "test", project_dir: ".")
+  end
+
+  desc "Build release AAB (does NOT upload)"
+  lane :build do
+    gradle_aab
+    UI.success "AAB built → #{aab_path}"
+  end
+
+  desc "Upload to Internal track (smoke-test before wider rollout)"
+  lane :deploy_internal do
+    gradle_aab
+    upload_to_play_store(
+      track:       "internal",
+      aab:         aab_path,
+      skip_upload_apk: true,
+      release_status:  "draft"
+    )
+  end
+
+  desc "Promote Internal → Alpha"
+  lane :deploy_alpha do
+    upload_to_play_store(
+      track:              "alpha",
+      track_promote_to:   "alpha",
+      aab:                aab_path,
+      skip_upload_apk:    true,
+      skip_upload_aab:    true   # promote existing; remove if pushing a fresh AAB
+    )
+  end
+
+  desc "Promote Alpha → Beta"
+  lane :deploy_beta do
+    upload_to_play_store(
+      track:              "beta",
+      track_promote_to:   "beta",
+      aab:                aab_path,
+      skip_upload_apk:    true,
+      skip_upload_aab:    true
+    )
+  end
+
+  desc "Promote to Production with rollout (default 10 %)"
+  lane :deploy_production do |options|
+    rollout = options[:rollout] || "0.1"
+    upload_to_play_store(
+      track:              "production",
+      rollout:            rollout,
+      aab:                aab_path,
+      skip_upload_apk:    true,
+      skip_upload_aab:    true
+    )
+  end
+
+  # Convenience: build fresh AAB then push straight to internal
+  desc "Build + deploy to Internal in one step"
+  lane :ship_internal do
+    gradle_aab
+    upload_to_play_store(
+      track:           "internal",
+      aab:             aab_path,
+      skip_upload_apk: true,
+      release_status:  "completed"
+    )
+  end
+
+end
