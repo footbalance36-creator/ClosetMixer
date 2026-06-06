@@ -1,5 +1,6 @@
 package com.closetmixer.android.ui.screen
 
+import android.app.Activity
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -54,6 +55,8 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.closetmixer.android.ui.component.StitchChip
 import com.closetmixer.android.util.copyImageToInternalStorage
+import com.closetmixer.android.util.openPlayStorePage
+import com.closetmixer.android.util.requestInAppReview
 import com.closetmixer.domain.model.AppLanguage
 import com.closetmixer.domain.model.CulturalStyle
 import com.closetmixer.presentation.viewmodel.SettingsViewModel
@@ -76,6 +79,7 @@ private val languages = listOf(
 fun SettingsScreen(viewModel: SettingsViewModel = koinInject()) {
     val state by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val activity = context as? Activity
 
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -320,6 +324,54 @@ fun SettingsScreen(viewModel: SettingsViewModel = koinInject()) {
                             Spacer(Modifier.height(8.dp))
                         }
                     }
+                }
+
+                // Rate app card
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .clickable {
+                            if (activity != null) requestInAppReview(activity)
+                            else openPlayStorePage(context)
+                        }
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primaryContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Outlined.Star,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        Column {
+                            Text("Noter l'application", style = MaterialTheme.typography.titleSmall)
+                            Text(
+                                "Partagez votre avis sur Google Play",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    Icon(
+                        Icons.Outlined.ChevronRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
                 }
 
                 // Logout button

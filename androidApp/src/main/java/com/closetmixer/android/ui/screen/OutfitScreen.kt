@@ -25,10 +25,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -54,6 +56,7 @@ import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import com.closetmixer.android.ui.component.StitchChip
 import com.closetmixer.android.ui.component.WeatherBanner
+import com.closetmixer.android.util.shareOutfit
 import com.closetmixer.data.model.Article
 import com.closetmixer.domain.model.CulturalStyle
 import com.closetmixer.presentation.viewmodel.OutfitViewModel
@@ -69,7 +72,6 @@ fun OutfitScreen(viewModel: OutfitViewModel = koinInject()) {
 
     var selectedStyle by remember { mutableStateOf(culturalStyles.first()) }
     var selectedOccasion by remember { mutableStateOf(occasions[1]) }
-
     val locationLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
@@ -77,10 +79,10 @@ fun OutfitScreen(viewModel: OutfitViewModel = koinInject()) {
     }
 
     LaunchedEffect(Unit) {
+        viewModel.generate()
         val hasPermission = ContextCompat.checkSelfPermission(
             context, Manifest.permission.ACCESS_COARSE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
-
         if (hasPermission) fetchAndLoadWeather(context, viewModel)
         else locationLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
     }
@@ -105,11 +107,22 @@ fun OutfitScreen(viewModel: OutfitViewModel = koinInject()) {
                     style = MaterialTheme.typography.displaySmall,
                     color = MaterialTheme.colorScheme.primary
                 )
-                Icon(
-                    Icons.Default.AutoAwesome,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (state.generatedOutfit != null) {
+                        IconButton(onClick = { shareOutfit(context, state.generatedOutfit!!) }) {
+                            Icon(
+                                Icons.Outlined.Share,
+                                contentDescription = "Partager la tenue",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                    Icon(
+                        Icons.Default.AutoAwesome,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
 
             // ── Weather banner ─────────────────────────────────────────────
@@ -369,7 +382,11 @@ private fun OutfitItemCard(
                 .padding(horizontal = 8.dp, vertical = 4.dp)
         ) {
             Text(
-                text = article?.sousCategorie?.uppercase() ?: label.uppercase(),
+                text = article?.let {
+                    val base = it.sousCategorie.uppercase()
+                    val metalPart = it.metal?.takeIf { m -> m != "aucun" }?.uppercase()
+                    if (metalPart != null) "$base · $metalPart" else base
+                } ?: label.uppercase(),
                 style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp, fontSize = 9.sp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

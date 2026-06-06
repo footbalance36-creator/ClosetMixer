@@ -375,8 +375,8 @@
   <h1>Closet<span>Mixer</span></h1>
   <div class="cover-sub">Application mobile de gestion de garde-robe intelligente</div>
   <div class="cover-meta">
-    <div><strong>Version</strong>1.0 — Cm-mob_002</div>
-    <div><strong>Date</strong>Mai 2026</div>
+    <div><strong>Version</strong>1.1 — Cm-mob_003</div>
+    <div><strong>Date</strong>Juin 2026</div>
     <div><strong>Statut</strong>En cours de développement</div>
     <div><strong>Plateforme</strong>Android (iOS à venir)</div>
   </div>
@@ -470,9 +470,8 @@
       </div>
     </div>
 
-    <h3>Hors périmètre (version 1.0)</h3>
+    <h3>Hors périmètre (version 1.x)</h3>
     <ul>
-      <li>Partage social et réseaux sociaux intégrés</li>
       <li>Marketplace de vêtements / e-commerce</li>
       <li>Reconnaissance d'image par IA pour le catalogage automatique</li>
       <li>Synchronisation multi-appareils via compte cloud</li>
@@ -652,15 +651,15 @@
         </tr>
         <tr>
           <td>F-13</td>
-          <td>Gérer le métal des bijoux (or, argent, rosé…)</td>
+          <td>Gérer le métal des bijoux — harmonie couleur/métal (or/rosé pour tons chauds, argent pour tons froids)</td>
           <td><span class="badge badge-should">SHOULD</span></td>
-          <td><span class="badge badge-v1">V1</span></td>
+          <td><span class="badge badge-v1">V1 ✓</span></td>
         </tr>
         <tr>
           <td>F-14</td>
-          <td>Associer des tenues à un voyage (valise virtuelle)</td>
-          <td><span class="badge badge-should">SHOULD</span></td>
-          <td><span class="badge badge-v2">V2</span></td>
+          <td>Associer des articles à un voyage — valise virtuelle (création, détail, ajout/retrait d'articles, suppression)</td>
+          <td><span class="badge badge-must">MUST</span></td>
+          <td><span class="badge badge-v1">V1 ✓</span></td>
         </tr>
         <tr>
           <td>F-15</td>
@@ -670,15 +669,39 @@
         </tr>
         <tr>
           <td>F-16</td>
-          <td>Partage de tenues sur les réseaux sociaux</td>
-          <td><span class="badge badge-could">COULD</span></td>
-          <td><span class="badge badge-v3">V3</span></td>
+          <td>Partage de tenues sur les réseaux sociaux (Intent natif Android, photos + texte)</td>
+          <td><span class="badge badge-should">SHOULD</span></td>
+          <td><span class="badge badge-v1">V1 ✓</span></td>
         </tr>
         <tr>
           <td>F-17</td>
           <td>Synchronisation cloud et compte utilisateur</td>
           <td><span class="badge badge-could">COULD</span></td>
           <td><span class="badge badge-v3">V3</span></td>
+        </tr>
+        <tr>
+          <td>F-18</td>
+          <td>Supprimer un article (appui long + dialogue de confirmation)</td>
+          <td><span class="badge badge-must">MUST</span></td>
+          <td><span class="badge badge-v1">V1 ✓</span></td>
+        </tr>
+        <tr>
+          <td>F-19</td>
+          <td>Persister la photo de profil entre sessions (SharedPreferences)</td>
+          <td><span class="badge badge-must">MUST</span></td>
+          <td><span class="badge badge-v1">V1 ✓</span></td>
+        </tr>
+        <tr>
+          <td>F-20</td>
+          <td>Auto-génération de tenue au chargement de l'écran Tenues</td>
+          <td><span class="badge badge-should">SHOULD</span></td>
+          <td><span class="badge badge-v1">V1 ✓</span></td>
+        </tr>
+        <tr>
+          <td>F-21</td>
+          <td>Sous-catégories vêtements étendues : chemise, pull, pantalon, jupe, short</td>
+          <td><span class="badge badge-must">MUST</span></td>
+          <td><span class="badge badge-v1">V1 ✓</span></td>
         </tr>
       </tbody>
     </table>
@@ -697,6 +720,7 @@
       <li><strong>En-tête :</strong> photo de profil cliquable + titre "Closet Mixer" (police serif dorée) + bouton d'ajout</li>
       <li><strong>Chips de filtre :</strong> "Tout", Vêtement, Chaussure, Bijou, Maquillage, Couvre-chef, Accessoire, Skincare</li>
       <li><strong>Carte article :</strong> photo plein cadre, bouton favori (cœur) en superposition, étiquette sous-catégorie et couleur sous la carte</li>
+      <li><strong>Suppression :</strong> appui long sur une carte → dialogue de confirmation → suppression définitive (F-18)</li>
       <li><strong>État vide :</strong> icône + message d'invitation à ajouter le premier article</li>
     </ul>
 
@@ -719,8 +743,12 @@
       <li><strong>Chips style culturel :</strong> Neutre, Modeste, K-Fashion, J-Fashion, Traditionnel (scroll horizontal)</li>
       <li><strong>Chips occasion :</strong> Travail, Casual, Soirée, Voyage, Sport</li>
       <li><strong>Grille asymétrique "Today's Mix" :</strong> haut (7/12 largeur) + chaussure/bijou empilés (5/12), bas pleine largeur</li>
-      <li><strong>Bouton "GÉNÉRER UNE TENUE" :</strong> déclenche l'algorithme de génération, indicateur de chargement</li>
+      <li><strong>Auto-génération :</strong> une tenue est générée automatiquement à l'ouverture de l'écran (F-20)</li>
+      <li><strong>Bouton "GÉNÉRER UNE TENUE" :</strong> déclenche l'algorithme de régénération, indicateur de chargement</li>
+      <li><strong>Partage :</strong> icône Partager dans la barre du haut, visible après génération — ouvre le sélecteur système Android avec photos + description textuelle (hashtags inclus) (F-16)</li>
       <li><strong>Logique météo :</strong> si température &lt; 10°C, privilégier bottes/baskets ; si style = Modest, inclure couvre-chef</li>
+      <li><strong>Harmonie métal/bijou :</strong> tons chauds dans la tenue → préférence or/rosé ; tons froids → préférence argent ; sinon aléatoire (F-13)</li>
+      <li><strong>Label bijou enrichi :</strong> l'étiquette de la carte bijou affiche la sous-catégorie ET le métal (ex : "COLLIER · OR")</li>
     </ul>
 
     <h3>E-04 — Calendrier</h3>
@@ -733,12 +761,24 @@
     </ul>
 
     <h3>E-05 — Voyages</h3>
-    <p>Gestion des déplacements et des valises virtuelles.</p>
+    <p>Gestion des déplacements et des valises virtuelles. L'écran fonctionne en deux vues : liste des voyages et détail d'un voyage (valise).</p>
+
+    <p><strong>Vue liste</strong></p>
     <ul>
-      <li><strong>Liste des voyages :</strong> cartes avec nom, destination (icône épingle), date de départ (icône calendrier)</li>
-      <li><strong>Bouton flottant :</strong> création d'un nouveau voyage</li>
+      <li><strong>Cartes voyage :</strong> nom, destination (icône épingle), dates début → fin (icône calendrier)</li>
+      <li><strong>FAB "+" :</strong> ouvre un dialogue de création avec nom (obligatoire), destination, date de départ, date de retour</li>
       <li><strong>État vide :</strong> illustration avion + message d'invitation</li>
-      <li>Chaque voyage stocke : nom, destination, dateDebut, dateFin</li>
+      <li>Clic sur une carte → bascule en vue détail</li>
+    </ul>
+
+    <p><strong>Vue détail — Valise virtuelle</strong></p>
+    <ul>
+      <li><strong>Barre supérieure :</strong> retour, nom du voyage, destination, dates, icône poubelle (suppression avec confirmation)</li>
+      <li><strong>Compteur :</strong> chip "N article(s)" mis à jour en temps réel</li>
+      <li><strong>Grille 3 colonnes :</strong> articles emballés en ratio 3:4, chaque carte affiche un bouton ✕ pour retirer l'article</li>
+      <li><strong>État vide :</strong> icône valise + message d'invitation</li>
+      <li><strong>FAB étendu "Ajouter des articles" :</strong> ouvre un bottom sheet (ModalBottomSheet) avec toute la garde-robe en grille 3 colonnes — tap sur un article l'ajoute (bordure or + overlay ✓) ou le retire s'il est déjà présent</li>
+      <li><strong>Retour système (bouton physique) :</strong> revient à la liste sans perdre la sélection</li>
     </ul>
 
     <h3>E-06 — Statistiques (Style Insights)</h3>
@@ -887,6 +927,18 @@
     <p>Les photos sélectionnées depuis la galerie sont copiées dans le répertoire privé
     de l'application via la fonction <code>copyImageToInternalStorage()</code>.
     L'URI d'origine n'est pas conservée. Le chemin interne est stocké dans la base de données.</p>
+
+    <h3>Partage de fichiers — FileProvider</h3>
+    <p>Le partage de tenues (F-16) expose les photos via <code>androidx.core.content.FileProvider</code>
+    avec l'autorité <code>{packageName}.fileprovider</code>. Les URIs générées sont accordées en lecture
+    temporaire à l'application cible (flag <code>FLAG_GRANT_READ_URI_PERMISSION</code>).
+    Aucune permission WRITE_EXTERNAL_STORAGE n'est requise.</p>
+
+    <h3>Persistance des paramètres</h3>
+    <p>Les préférences utilisateur (photo de profil) sont persistées via l'interface <code>SettingsStorage</code>
+    définie dans le module partagé. L'implémentation Android utilise <code>SharedPreferences</code>
+    (fichier <code>closetmixer_prefs</code>). Ce patron permet une future implémentation iOS
+    (NSUserDefaults) sans modifier le code partagé.</p>
   </section>
 
   <!-- ══════════════════════════════════════════════════════
@@ -985,19 +1037,25 @@
       </li>
       <li>
         <span class="phase">Cm-mob_003 — Fonctionnalités avancées</span>
-        <span class="duration">À planifier — V2</span>
+        <span class="duration">✓ Livré — Juin 2026</span>
         <ul class="items">
-          <li>Association tenues ↔ voyages (valise virtuelle)</li>
-          <li>Suppression et modification d'un article</li>
-          <li>Persistance des paramètres (SharedPreferences)</li>
-          <li>Support RTL complet pour l'arabe</li>
+          <li>Valise virtuelle complète : création voyage, vue détail, ajout/retrait d'articles (F-14)</li>
+          <li>Suppression d'un article par appui long avec confirmation (F-18)</li>
+          <li>Photo de profil persistante entre sessions via SharedPreferences (F-19)</li>
+          <li>Météo en temps réel — Open-Meteo + LocationManager natif (F-05)</li>
+          <li>Auto-génération de tenue au chargement de l'écran (F-20)</li>
+          <li>Harmonie métal/couleur dans la sélection des bijoux (F-13)</li>
+          <li>Partage de tenues — Intent natif Android + FileProvider (F-16)</li>
+          <li>Sous-catégories vêtements étendues : chemise, pull, pantalon, jupe, short (F-21)</li>
+          <li>Correction du sélecteur vêtements plein corps (robe, abaya, kaftan, sari) sans bas (F-04)</li>
         </ul>
       </li>
       <li>
         <span class="phase">Cm-mob_004 — Publication</span>
-        <span class="duration">À planifier — V2/V3</span>
+        <span class="duration">À planifier</span>
         <ul class="items">
           <li>Tests unitaires et tests UI (Compose Test)</li>
+          <li>Support RTL complet pour l'arabe</li>
           <li>Publication sur Google Play (closed beta)</li>
           <li>Analyse de performance et correction de régressions</li>
           <li>Début du portage iOS (KMP)</li>
@@ -1010,7 +1068,7 @@
       <thead><tr><th>Livrable</th><th>Format</th><th>Jalon</th></tr></thead>
       <tbody>
         <tr><td>APK de démonstration signé</td><td>.apk / .aab</td><td>Cm-mob_002</td></tr>
-        <tr><td>Cahier des charges MOA (ce document)</td><td>HTML</td><td>Cm-mob_002</td></tr>
+        <tr><td>Cahier des charges MOA (ce document)</td><td>HTML</td><td>Cm-mob_002 → mis à jour Cm-mob_003</td></tr>
         <tr><td>Spécification technique MOE</td><td>À créer</td><td>Cm-mob_003</td></tr>
         <tr><td>Code source versionné</td><td>GitHub — feature branches</td><td>Continu</td></tr>
         <tr><td>Rapport de tests</td><td>À définir</td><td>Cm-mob_004</td></tr>
@@ -1045,8 +1103,8 @@
   </section>
 
   <footer>
-    <span>ClosetMixer — Cahier des charges MOA v1.0 — Cm-mob_002</span>
-    <span>Mai 2026 — Confidentiel</span>
+    <span>ClosetMixer — Cahier des charges MOA v1.1 — Cm-mob_003</span>
+    <span>Juin 2026 — Confidentiel</span>
   </footer>
 
 </div>

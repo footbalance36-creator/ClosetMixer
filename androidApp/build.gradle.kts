@@ -64,6 +64,9 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.splashscreen)
 
+    // Google Play In-App Review
+    implementation(libs.play.review)
+
     // Moko
     implementation(libs.moko.resources.compose)
 }

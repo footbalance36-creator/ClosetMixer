@@ -18,6 +18,7 @@ data class VoyageUiState(
     val voyages: List<Voyage> = emptyList(),
     val selectedVoyage: Voyage? = null,
     val packingList: List<Article> = emptyList(),
+    val allArticles: List<Article> = emptyList(),
     val isLoading: Boolean = false
 )
 
@@ -55,13 +56,64 @@ class VoyageViewModel(private val db: ClosetDatabase) {
 
     fun selectVoyage(voyage: Voyage) {
         scope.launch {
-            val articles = withContext(Dispatchers.Default) {
-                db.closetDatabaseQueries.getArticlesForVoyage(voyage.id).executeAsList().map {
-                    Article(it.id, it.photoPath, it.categorie, it.sousCategorie, it.couleur,
-                        it.metal, it.tags, it.culture, it.dateAjout, it.nbUtilisations, it.isFavori)
-                }
-            }
-            _uiState.update { it.copy(selectedVoyage = voyage, packingList = articles) }
+            _uiState.update { it.copy(selectedVoyage = voyage) }
+            reloadPackingList(voyage.id)
         }
     }
+
+    fun clearSelectedVoyage() {
+        _uiState.update { it.copy(selectedVoyage = null, packingList = emptyList()) }
+    }
+
+    fun loadAllArticles() {
+        scope.launch {
+            val articles = withContext(Dispatchers.Default) {
+                db.closetDatabaseQueries.getAllArticles().executeAsList().map { it.toArticle() }
+            }
+            _uiState.update { it.copy(allArticles = articles) }
+        }
+    }
+
+    fun addArticleToVoyage(articleId: String) {
+        val voyageId = _uiState.value.selectedVoyage?.id ?: return
+        scope.launch {
+            withContext(Dispatchers.Default) {
+                db.closetDatabaseQueries.insertVoyageArticle(voyageId, articleId)
+            }
+            reloadPackingList(voyageId)
+        }
+    }
+
+    fun removeArticleFromVoyage(articleId: String) {
+        val voyageId = _uiState.value.selectedVoyage?.id ?: return
+        scope.launch {
+            withContext(Dispatchers.Default) {
+                db.closetDatabaseQueries.removeVoyageArticle(voyageId, articleId)
+            }
+            reloadPackingList(voyageId)
+        }
+    }
+
+    fun deleteVoyage(voyageId: String) {
+        scope.launch {
+            withContext(Dispatchers.Default) {
+                db.closetDatabaseQueries.deleteVoyage(voyageId)
+            }
+            clearSelectedVoyage()
+            loadVoyages()
+        }
+    }
+
+    private suspend fun reloadPackingList(voyageId: String) {
+        val articles = withContext(Dispatchers.Default) {
+            db.closetDatabaseQueries.getArticlesForVoyage(voyageId).executeAsList()
+                .map { it.toArticle() }
+        }
+        _uiState.update { it.copy(packingList = articles) }
+    }
+
+    private fun com.closetmixer.db.Article.toArticle() = Article(
+        id, photoPath, categorie, sousCategorie, couleur, metal, tags, culture,
+        dateAjout, nbUtilisations, isFavori
+    )
 }
