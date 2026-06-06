@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClosetMixer — Cahier des charges MOA</title>
+  <style>
+    :root {
+      --gold:       #735C00;
+      --gold-light: #D4AF37;
+      --gold-pale:  #FFF8E7;
+      --bg:         #FAF9F7;
+      --surface:    #FFFFFF;
+      --border:     #E3E2E0;
+      --text:       #1A1C1B;
+      --muted:      #4D4635;
+      --accent:     #554300;
+      --red:        #BA1A1A;
+      --red-light:  #FFEDED;
+      --blue:       #415BA4;
+      --blue-light: #EEF1FF;
+      --green:      #2E7D32;
+      --green-light:#E8F5E9;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    /* ── Cover ── */
+    .cover {
+      background: linear-gradient(135deg, #1A1C1B 60%, #2e2700 100%);
+      color: #fff;
+      padding: 72px 64px 56px;
+      position: relative;
+      overflow: hidden;
+    }
+    .cover::after {
+      content: "";
+      position: absolute;
+      right: -60px; top: -60px;
+      width: 340px; height: 340px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #D4AF3730 0%, transparent 70%);
+    }
+    .cover-tag {
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+    .cover h1 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 48px;
+      font-weight: 700;
+      letter-spacing: -1px;
+      line-height: 1.1;
+      color: #fff;
+    }
+    .cover h1 span { color: var(--gold-light); }
+    .cover-sub {
+      font-size: 18px;
+      color: #ccc;
+      margin-top: 12px;
+      font-weight: 300;
+    }
+    .cover-meta {
+      margin-top: 48px;
+      display: flex;
+      gap: 48px;
+      font-size: 13px;
+      color: #aaa;
+    }
+    .cover-meta strong { color: #fff; display: block; font-size: 14px; }
+
+    /* ── Layout ── */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 32px 80px;
+    }
+
+    /* ── Table of contents ── */
+    .toc {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--gold);
+      border-radius: 8px;
+      padding: 28px 32px;
+      margin: 40px 0;
+    }
+    .toc h2 {
+      font-size: 13px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin: 6px 0; }
+    .toc a { color: var(--gold); text-decoration: none; font-weight: 500; }
+    .toc a:hover { text-decoration: underline; }
+
+    /* ── Sections ── */
+    section { margin-top: 56px; }
+
+    .section-number {
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    h2 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 10px;
+      margin-bottom: 24px;
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent);
+      margin: 28px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    h3::before {
+      content: "";
+      width: 4px; height: 18px;
+      background: var(--gold-light);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    p { margin-bottom: 14px; color: var(--text); }
+
+    ul, ol { padding-left: 22px; margin-bottom: 14px; }
+    li { margin: 5px 0; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+    .card p { margin: 0; font-size: 14px; color: var(--muted); }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    /* ── Screen cards ── */
+    .screen-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .screen-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 16px;
+    }
+    .screen-card .icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+    .screen-card .name {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .screen-card .desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ── Feature tables ── */
+    .feat-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+    .feat-table thead tr {
+      background: var(--gold-pale);
+    }
+    .feat-table th {
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      border-bottom: 2px solid var(--gold-light);
+    }
+    .feat-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .feat-table tr:last-child td { border-bottom: none; }
+    .feat-table tr:hover td { background: #FAFAF8; }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+    .badge-must  { background: #FFE0E0; color: var(--red); }
+    .badge-should{ background: #FFF3CC; color: #7A5E00; }
+    .badge-could { background: #E8F5E9; color: var(--green); }
+    .badge-v1    { background: #E8F5E9; color: var(--green); }
+    .badge-v2    { background: #EEF1FF; color: var(--blue); }
+    .badge-v3    { background: #F3F0FF; color: #5B3FBA; }
+
+    /* ── Callouts ── */
+    .callout {
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .callout-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+    .callout-body { font-size: 14px; line-height: 1.6; }
+    .callout-body strong { display: block; font-size: 14px; margin-bottom: 3px; }
+    .callout-info    { background: var(--blue-light);  border-left: 4px solid var(--blue); }
+    .callout-warning { background: #FFF8E7;             border-left: 4px solid var(--gold); }
+    .callout-success { background: var(--green-light);  border-left: 4px solid var(--green); }
+    .callout-danger  { background: var(--red-light);    border-left: 4px solid var(--red); }
+
+    /* ── Persona cards ── */
+    .persona-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .persona {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 18px;
+    }
+    .persona-avatar {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      font-size: 22px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 12px;
+    }
+    .persona h4 { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+    .persona .sub { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+    .persona ul { font-size: 13px; color: var(--muted); }
+
+    /* ── Timeline ── */
+    .timeline { list-style: none; padding: 0; position: relative; }
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 18px; top: 0; bottom: 0;
+      width: 2px;
+      background: var(--border);
+    }
+    .timeline li {
+      position: relative;
+      padding: 0 0 28px 52px;
+    }
+    .timeline li::before {
+      content: "";
+      position: absolute;
+      left: 10px; top: 6px;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--gold-light);
+      border: 3px solid var(--bg);
+      box-shadow: 0 0 0 2px var(--gold);
+    }
+    .timeline .phase { font-weight: 700; font-size: 15px; color: var(--text); }
+    .timeline .duration {
+      font-size: 12px; color: var(--gold); font-weight: 600;
+      margin-left: 10px;
+    }
+    .timeline .items {
+      font-size: 13px; color: var(--muted);
+      margin-top: 4px; list-style: none; padding: 0;
+    }
+    .timeline .items li { margin: 2px 0; }
+    .timeline .items li::before { content: "→ "; color: var(--gold-light); }
+
+    /* ── Tech stack ── */
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .tech-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      font-size: 13px;
+    }
+    .tech-item .tech-name { font-weight: 700; color: var(--text); }
+    .tech-item .tech-ver  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      margin-top: 64px;
+      padding-top: 24px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ── Print ── */
+    @media print {
+      .cover { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      section { page-break-inside: avoid; }
+    }
+
+    @media (max-width: 700px) {
+      .cover { padding: 40px 24px 36px; }
+      .cover h1 { font-size: 32px; }
+      .screen-grid { grid-template-columns: 1fr 1fr; }
+      .card-grid   { grid-template-columns: 1fr; }
+      .persona-grid{ grid-template-columns: 1fr; }
+      .tech-grid   { grid-template-columns: repeat(2,1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════
+     COVER
+══════════════════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-tag">Cahier des charges — Maîtrise d'Ouvrage</div>
+  <h1>Closet<span>Mixer</span></h1>
+  <div class="cover-sub">Application mobile de gestion de garde-robe intelligente</div>
+  <div class="cover-meta">
+    <div><strong>Version</strong>1.1 — Cm-mob_003</div>
+    <div><strong>Date</strong>Juin 2026</div>
+    <div><strong>Statut</strong>En cours de développement</div>
+    <div><strong>Plateforme</strong>Android (iOS à venir)</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ── TOC ── -->
+  <div class="toc">
+    <h2>Sommaire</h2>
+    <ol>
+      <li><a href="#contexte">Contexte et enjeux</a></li>
+      <li><a href="#objectifs">Objectifs du projet</a></li>
+      <li><a href="#personas">Public cible et personas</a></li>
+      <li><a href="#perimetre">Périmètre fonctionnel</a></li>
+      <li><a href="#ecrans">Description détaillée des écrans</a></li>
+      <li><a href="#exigences">Exigences non-fonctionnelles</a></li>
+      <li><a href="#technique">Contraintes techniques</a></li>
+      <li><a href="#design">Charte graphique et design system</a></li>
+      <li><a href="#jalons">Jalons et livrables</a></li>
+      <li><a href="#glossaire">Glossaire</a></li>
+    </ol>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       1. CONTEXTE
+  ══════════════════════════════════════════════════════ -->
+  <section id="contexte">
+    <div class="section-number">01</div>
+    <h2>Contexte et enjeux</h2>
+
+    <p>
+      Le marché de la mode représente plus de 1 700 milliards de dollars mondialement. Pourtant,
+      une étude McKinsey révèle que 60 % des vêtements achetés ne sont jamais portés. Le manque
+      de visibilité sur sa garde-robe, la difficulté à créer des tenues cohérentes et l'absence
+      d'organisation au quotidien engendrent achats superflus, gaspillage et frustration.
+    </p>
+
+    <p>
+      <strong>ClosetMixer</strong> répond à ce constat en proposant un assistant vestimentaire
+      personnel numérique : photographier ses articles, générer des tenues adaptées à la météo
+      et à l'occasion, planifier ses looks dans un calendrier et préparer ses valises de voyage.
+    </p>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">🌍</div>
+      <div class="callout-body">
+        <strong>Dimension multiculturelle différenciante</strong>
+        L'application intègre nativement des styles culturels variés (mode modeste, K-Fashion,
+        J-Fashion, traditionnel) et supporte 8 langues dont l'arabe (RTL). Ce positionnement
+        vise une audience internationale souvent ignorée par les acteurs du marché.
+      </div>
+    </div>
+
+    <h3>Enjeux clés</h3>
+    <ul>
+      <li><strong>Enjeu usage :</strong> simplifier la prise de décision vestimentaire quotidienne</li>
+      <li><strong>Enjeu consommation :</strong> réduire les achats inutiles en valorisant l'existant</li>
+      <li><strong>Enjeu culturel :</strong> proposer une application inclusive pour toutes les identités vestimentaires</li>
+      <li><strong>Enjeu business :</strong> constituer une base utilisateurs qualifiée pour de futures fonctionnalités premium</li>
+    </ul>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       2. OBJECTIFS
+  ══════════════════════════════════════════════════════ -->
+  <section id="objectifs">
+    <div class="section-number">02</div>
+    <h2>Objectifs du projet</h2>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">🎯 Objectif principal</div>
+        <p>Fournir une application mobile permettant à l'utilisateur de gérer sa garde-robe,
+        générer des tenues automatiquement et planifier ses looks dans le temps.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">📱 Objectif produit</div>
+        <p>Lancer une version Android stable et performante (MVP) avec une interface
+        de niveau premium répondant au design system Stitch.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">🌐 Objectif marché</div>
+        <p>Cibler les utilisatrices entre 18 et 40 ans sensibles à la mode et à l'organisation,
+        avec une forte représentation de la diaspora et des communautés culturelles diverses.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 Objectif mesurable (6 mois)</div>
+        <p>500 téléchargements organiques sur Google Play, note ≥ 4,2 étoiles,
+        taux de rétention J7 ≥ 40 %.</p>
+      </div>
+    </div>
+
+    <h3>Hors périmètre (version 1.x)</h3>
+    <ul>
+      <li>Marketplace de vêtements / e-commerce</li>
+      <li>Reconnaissance d'image par IA pour le catalogage automatique</li>
+      <li>Synchronisation multi-appareils via compte cloud</li>
+      <li>Application iOS (prévu version 2.0 via KMP)</li>
+    </ul>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       3. PERSONAS
+  ══════════════════════════════════════════════════════ -->
+  <section id="personas">
+    <div class="section-number">03</div>
+    <h2>Public cible et personas</h2>
+
+    <div class="persona-grid">
+      <div class="persona">
+        <div class="persona-avatar" style="background:#FFF8E7">👩‍💼</div>
+        <h4>Yasmine, 28 ans</h4>
+        <div class="sub">Ingénieure, mode modeste</div>
+        <ul>
+          <li>Porte le hijab au quotidien</li>
+          <li>Frustration : les apps ignorent la mode modeste</li>
+          <li>Besoin : tenues professionnelles couvertes et élégantes</li>
+          <li>Langue : Français / Arabe</li>
+        </ul>
+      </div>
+      <div class="persona">
+        <div class="persona-avatar" style="background:#EEF1FF">👩‍🎨</div>
+        <h4>Léa, 24 ans</h4>
+        <div class="sub">Étudiante, passionnée K-Fashion</div>
+        <ul>
+          <li>Achète beaucoup, porte peu</li>
+          <li>Frustration : ne sait jamais quoi mettre</li>
+          <li>Besoin : générer des tenues stylées rapidement</li>
+          <li>Langue : Français / Coréen</li>
+        </ul>
+      </div>
+      <div class="persona">
+        <div class="persona-avatar" style="background:#E8F5E9">✈️</div>
+        <h4>Sofia, 35 ans</h4>
+        <div class="sub">Consultante, voyageuse fréquente</div>
+        <ul>
+          <li>Voyage 2× par mois pour le travail</li>
+          <li>Frustration : faire ses valises prend 1h</li>
+          <li>Besoin : planifier les tenues par voyage</li>
+          <li>Langue : Français / Espagnol</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       4. PERIMETRE FONCTIONNEL
+  ══════════════════════════════════════════════════════ -->
+  <section id="perimetre">
+    <div class="section-number">04</div>
+    <h2>Périmètre fonctionnel</h2>
+
+    <p>L'application est organisée en <strong>6 modules fonctionnels</strong> accessibles depuis
+    une barre de navigation inférieure à 5 entrées.</p>
+
+    <div class="screen-grid">
+      <div class="screen-card">
+        <div class="icon">👗</div>
+        <div class="name">Garde-robe</div>
+        <div class="desc">Catalogue photographique de tous les articles, filtrage par catégorie, ajout et gestion des favoris.</div>
+      </div>
+      <div class="screen-card">
+        <div class="icon">✨</div>
+        <div class="name">Tenues</div>
+        <div class="desc">Génération automatique de tenues selon la météo, l'occasion et le style culturel.</div>
+      </div>
+      <div class="screen-card">
+        <div class="icon">📅</div>
+        <div class="name">Calendrier</div>
+        <div class="desc">Planification mensuelle des tenues avec indicateurs visuels sur les jours programmés.</div>
+      </div>
+      <div class="screen-card">
+        <div class="icon">✈️</div>
+        <div class="name">Voyage</div>
+        <div class="desc">Création de voyages avec destination et dates, sélection de tenues pour valise.</div>
+      </div>
+      <div class="screen-card">
+        <div class="icon">📊</div>
+        <div class="name">Statistiques</div>
+        <div class="desc">Tableau de bord : répartition par catégorie, articles jamais portés, total tenues générées.</div>
+      </div>
+      <div class="screen-card">
+        <div class="icon">⚙️</div>
+        <div class="name">Paramètres</div>
+        <div class="desc">Photo de profil, langue, style culturel, mode sombre, déconnexion.</div>
+      </div>
+    </div>
+
+    <h3>Matrice des exigences fonctionnelles (MoSCoW)</h3>
+    <table class="feat-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Fonctionnalité</th>
+          <th>Priorité</th>
+          <th>Version</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>F-01</td>
+          <td>Ajouter un article avec photo, catégorie, sous-catégorie, couleur et style culturel</td>
+          <td><span class="badge badge-must">MUST</span></td>
+          <td><span class="badge badge-v1">V1</span></td>
+        </tr>
+        <tr>
+          <td>F-02</td>
+          <td>Consulter et filtrer la garde-robe par catégorie (grille 2 colonnes)</td>
+          <td><span class="badge badge-must">MUST</span></td>
+          <td><span class="badge badge-v1">V1</span></td>
+        </tr>
+        <tr>
+          <td>F-03</td>
+          <td>Marquer un article en favori</td>
+          <td><span class="badge badge-must">MUST</span></td>
+          <td><span class="badge badge-v1">V1</span></td>
+        </tr>
+        <tr>
+          <td>F-04</td>
+          <td>Générer une tenue automatique (haut + bas + chaussures + bijou)</td>
+          <td><span class="badge badge-must">MUST</span></td>
+          <td><span class="badge badge-v1">V1</span></td>
+        </tr>
+        <tr>
+          <td>F-05</td>
+          <td>Adapter la génération à la météo locale (API Open-Meteo)</td>
+          <td><span class="badge badge-must">MUST</span></td>
+          <td><span class="badge badge-v1">V1</span></td>
+        </tr>
+        <tr>
+          <td>F-06</td>
+          <td>Filtrer la génération par style culturel et occasion</td>
+          <td><span class="badge badge-must">MUST</span></td>
+          <td><span class="badge badge-v1">V1</span></td>
+        </tr>
+        <tr>
+          <td>F-07</td>
+          <td>Planifier une tenue sur un jour du calendrier</td>
+          <td><span class="badge badge-must">MUST</span></td>
+          <td><span class="badge badge-v1">V1</span></td>
+        </tr>
+        <tr>
+          <td>F-08</td>
+          <td>Créer un voyage avec nom, destination et dates</td>
+          <td><span class="badge badge-must">MUST</span></td>
+          <td><span class="badge badge-v1">V1</span></td>
+        </tr>
+        <tr>
+          <td>F-09</td>
+          <td>Consulter les statistiques (répartition, jamais portés, total tenues)</td>
+          <td><span class="badge badge-must">MUST</span></td>
+          <td><span class="badge badge-v1">V1</span></td>
+        </tr>
+        <tr>
+          <td>F-10</td>
+          <td>Choisir la langue de l'interface (8 langues dont arabe RTL)</td>
+          <td><span class="badge badge-must">MUST</span></td>
+          <td><span class="badge badge-v1">V1</span></td>
+        </tr>
+        <tr>
+          <td>F-11</td>
+          <td>Définir et modifier la photo de profil</td>
+          <td><span class="badge badge-must">MUST</span></td>
+          <td><span class="badge badge-v1">V1</span></td>
+        </tr>
+        <tr>
+          <td>F-12</td>
+          <td>Activer le mode sombre</td>
+          <td><span class="badge badge-should">SHOULD</span></td>
+          <td><span class="badge badge-v1">V1</span></td>
+        </tr>
+        <tr>
+          <td>F-13</td>
+          <td>Gérer le métal des bijoux — harmonie couleur/métal (or/rosé pour tons chauds, argent pour tons froids)</td>
+          <td><span class="badge badge-should">SHOULD</span></td>
+          <td><span class="badge badge-v1">V1 ✓</span></td>
+        </tr>
+        <tr>
+          <td>F-14</td>
+          <td>Associer des articles à un voyage — valise virtuelle (création, détail, ajout/retrait d'articles, suppression)</td>
+          <td><span class="badge badge-must">MUST</span></td>
+          <td><span class="badge badge-v1">V1 ✓</span></td>
+        </tr>
+        <tr>
+          <td>F-15</td>
+          <td>Reconnaissance automatique de la couleur via IA image</td>
+          <td><span class="badge badge-could">COULD</span></td>
+          <td><span class="badge badge-v2">V2</span></td>
+        </tr>
+        <tr>
+          <td>F-16</td>
+          <td>Partage de tenues sur les réseaux sociaux (Intent natif Android, photos + texte)</td>
+          <td><span class="badge badge-should">SHOULD</span></td>
+          <td><span class="badge badge-v1">V1 ✓</span></td>
+        </tr>
+        <tr>
+          <td>F-17</td>
+          <td>Synchronisation cloud et compte utilisateur</td>
+          <td><span class="badge badge-could">COULD</span></td>
+          <td><span class="badge badge-v3">V3</span></td>
+        </tr>
+        <tr>
+          <td>F-18</td>
+          <td>Supprimer un article (appui long + dialogue de confirmation)</td>
+          <td><span class="badge badge-must">MUST</span></td>
+          <td><span class="badge badge-v1">V1 ✓</span></td>
+        </tr>
+        <tr>
+          <td>F-19</td>
+          <td>Persister la photo de profil entre sessions (SharedPreferences)</td>
+          <td><span class="badge badge-must">MUST</span></td>
+          <td><span class="badge badge-v1">V1 ✓</span></td>
+        </tr>
+        <tr>
+          <td>F-20</td>
+          <td>Auto-génération de tenue au chargement de l'écran Tenues</td>
+          <td><span class="badge badge-should">SHOULD</span></td>
+          <td><span class="badge badge-v1">V1 ✓</span></td>
+        </tr>
+        <tr>
+          <td>F-21</td>
+          <td>Sous-catégories vêtements étendues : chemise, pull, pantalon, jupe, short</td>
+          <td><span class="badge badge-must">MUST</span></td>
+          <td><span class="badge badge-v1">V1 ✓</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       5. ÉCRANS DÉTAILLÉS
+  ══════════════════════════════════════════════════════ -->
+  <section id="ecrans">
+    <div class="section-number">05</div>
+    <h2>Description détaillée des écrans</h2>
+
+    <h3>E-01 — Garde-robe</h3>
+    <p>Écran d'accueil de l'application. Il affiche l'ensemble des articles sous forme de grille à 2 colonnes avec un ratio d'image 3:4 (portrait), conforme au standard des applications de mode.</p>
+    <ul>
+      <li><strong>En-tête :</strong> photo de profil cliquable + titre "Closet Mixer" (police serif dorée) + bouton d'ajout</li>
+      <li><strong>Chips de filtre :</strong> "Tout", Vêtement, Chaussure, Bijou, Maquillage, Couvre-chef, Accessoire, Skincare</li>
+      <li><strong>Carte article :</strong> photo plein cadre, bouton favori (cœur) en superposition, étiquette sous-catégorie et couleur sous la carte</li>
+      <li><strong>Suppression :</strong> appui long sur une carte → dialogue de confirmation → suppression définitive (F-18)</li>
+      <li><strong>État vide :</strong> icône + message d'invitation à ajouter le premier article</li>
+    </ul>
+
+    <h3>E-02 — Ajouter un article</h3>
+    <p>Formulaire d'ajout accessible depuis l'icône "+" de la garde-robe. Conforme à la spec Cm-mob_002 : tous les sélecteurs sont des listes déroulantes (ExposedDropdownMenuBox), non des boutons.</p>
+    <ul>
+      <li><strong>Photo :</strong> zone cliquable 240dp avec sélecteur de galerie système</li>
+      <li><strong>Catégorie :</strong> liste déroulante (7 catégories)</li>
+      <li><strong>Sous-catégorie :</strong> liste filtrée dynamiquement selon la catégorie choisie</li>
+      <li><strong>Couleur :</strong> palette de 28 pastilles colorées avec validation par coche</li>
+      <li><strong>Métal :</strong> affiché uniquement si catégorie = Bijou (Or, Argent, Rosé, Fantaisie, Aucun)</li>
+      <li><strong>Style culturel :</strong> liste déroulante (Modest, K-Fashion, J-Fashion, Traditionnel, Neutre)</li>
+      <li><strong>Bouton Enregistrer :</strong> activé uniquement si la sous-catégorie est renseignée</li>
+    </ul>
+
+    <h3>E-03 — Tenues (Génération)</h3>
+    <p>Écran de génération de tenues combinant météo locale, style culturel et occasion.</p>
+    <ul>
+      <li><strong>Bandeau météo :</strong> température + description + emoji météo, fond or translucide</li>
+      <li><strong>Chips style culturel :</strong> Neutre, Modeste, K-Fashion, J-Fashion, Traditionnel (scroll horizontal)</li>
+      <li><strong>Chips occasion :</strong> Travail, Casual, Soirée, Voyage, Sport</li>
+      <li><strong>Grille asymétrique "Today's Mix" :</strong> haut (7/12 largeur) + chaussure/bijou empilés (5/12), bas pleine largeur</li>
+      <li><strong>Auto-génération :</strong> une tenue est générée automatiquement à l'ouverture de l'écran (F-20)</li>
+      <li><strong>Bouton "GÉNÉRER UNE TENUE" :</strong> déclenche l'algorithme de régénération, indicateur de chargement</li>
+      <li><strong>Partage :</strong> icône Partager dans la barre du haut, visible après génération — ouvre le sélecteur système Android avec photos + description textuelle (hashtags inclus) (F-16)</li>
+      <li><strong>Logique météo :</strong> si température &lt; 10°C, privilégier bottes/baskets ; si style = Modest, inclure couvre-chef</li>
+      <li><strong>Harmonie métal/bijou :</strong> tons chauds dans la tenue → préférence or/rosé ; tons froids → préférence argent ; sinon aléatoire (F-13)</li>
+      <li><strong>Label bijou enrichi :</strong> l'étiquette de la carte bijou affiche la sous-catégorie ET le métal (ex : "COLLIER · OR")</li>
+    </ul>
+
+    <h3>E-04 — Calendrier</h3>
+    <p>Vue mensuelle permettant de visualiser et planifier les tenues jour par jour.</p>
+    <ul>
+      <li><strong>En-tête :</strong> titre "Calendrier" + nom du mois en cours</li>
+      <li><strong>Grille 7 colonnes :</strong> Dim–Lun–Mar–Mer–Jeu–Ven–Sam, décalage automatique du 1er du mois</li>
+      <li><strong>Indicateurs :</strong> point doré sous les jours avec une tenue planifiée, fond or pâle sur le jour sélectionné, couleur primaire pour aujourd'hui</li>
+      <li><strong>Résumé mensuel :</strong> carte affichant le nombre de tenues planifiées ce mois</li>
+    </ul>
+
+    <h3>E-05 — Voyages</h3>
+    <p>Gestion des déplacements et des valises virtuelles. L'écran fonctionne en deux vues : liste des voyages et détail d'un voyage (valise).</p>
+
+    <p><strong>Vue liste</strong></p>
+    <ul>
+      <li><strong>Cartes voyage :</strong> nom, destination (icône épingle), dates début → fin (icône calendrier)</li>
+      <li><strong>FAB "+" :</strong> ouvre un dialogue de création avec nom (obligatoire), destination, date de départ, date de retour</li>
+      <li><strong>État vide :</strong> illustration avion + message d'invitation</li>
+      <li>Clic sur une carte → bascule en vue détail</li>
+    </ul>
+
+    <p><strong>Vue détail — Valise virtuelle</strong></p>
+    <ul>
+      <li><strong>Barre supérieure :</strong> retour, nom du voyage, destination, dates, icône poubelle (suppression avec confirmation)</li>
+      <li><strong>Compteur :</strong> chip "N article(s)" mis à jour en temps réel</li>
+      <li><strong>Grille 3 colonnes :</strong> articles emballés en ratio 3:4, chaque carte affiche un bouton ✕ pour retirer l'article</li>
+      <li><strong>État vide :</strong> icône valise + message d'invitation</li>
+      <li><strong>FAB étendu "Ajouter des articles" :</strong> ouvre un bottom sheet (ModalBottomSheet) avec toute la garde-robe en grille 3 colonnes — tap sur un article l'ajoute (bordure or + overlay ✓) ou le retire s'il est déjà présent</li>
+      <li><strong>Retour système (bouton physique) :</strong> revient à la liste sans perdre la sélection</li>
+    </ul>
+
+    <h3>E-06 — Statistiques (Style Insights)</h3>
+    <p>Tableau de bord analytics de la garde-robe.</p>
+    <ul>
+      <li><strong>KPI cards :</strong> total tenues générées + articles jamais portés</li>
+      <li><strong>Répartition par catégorie :</strong> liste avec barre de progression proportionnelle et compteur</li>
+    </ul>
+
+    <h3>E-07 — Paramètres</h3>
+    <p>Configuration personnelle de l'utilisateur.</p>
+    <ul>
+      <li><strong>Avatar :</strong> cercle 80dp cliquable, ouvre le sélecteur photo, badge "✏" en surimpression</li>
+      <li><strong>Badge premium :</strong> statut membre affiché</li>
+      <li><strong>Mode sombre :</strong> interrupteur toggle</li>
+      <li><strong>Style culturel :</strong> chips horizontaux sélectionnables</li>
+      <li><strong>Langue :</strong> grille 4 colonnes de drapeaux + nom natif (8 langues)</li>
+      <li><strong>Déconnexion :</strong> bouton avec bordure rouge</li>
+    </ul>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       6. EXIGENCES NON-FONCTIONNELLES
+  ══════════════════════════════════════════════════════ -->
+  <section id="exigences">
+    <div class="section-number">06</div>
+    <h2>Exigences non-fonctionnelles</h2>
+
+    <h3>Performance</h3>
+    <table class="feat-table">
+      <thead><tr><th>Critère</th><th>Cible</th></tr></thead>
+      <tbody>
+        <tr><td>Démarrage à froid</td><td>&lt; 2 secondes (avec écran de démarrage)</td></tr>
+        <tr><td>Chargement de la garde-robe (100 articles)</td><td>&lt; 500 ms</td></tr>
+        <tr><td>Génération d'une tenue</td><td>&lt; 800 ms</td></tr>
+        <tr><td>Chargement d'une image article</td><td>Progressive avec placeholder</td></tr>
+        <tr><td>Consommation mémoire</td><td>&lt; 150 Mo en usage courant</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Accessibilité</h3>
+    <ul>
+      <li>Support RTL natif pour l'arabe (layout mirroring)</li>
+      <li>Taille minimale des zones tactiles : 48×48 dp</li>
+      <li>Contraste couleur conforme WCAG AA (ratio ≥ 4,5:1 pour le texte)</li>
+      <li>Labels <code>contentDescription</code> sur tous les éléments interactifs</li>
+      <li>Compatible TalkBack (lecteur d'écran Android)</li>
+    </ul>
+
+    <h3>Compatibilité</h3>
+    <ul>
+      <li>Android minimum : API 26 (Android 8.0 Oreo)</li>
+      <li>Android cible : API 35 (Android 15)</li>
+      <li>Résolutions testées : 360dp → 428dp de largeur</li>
+      <li>Support des thèmes clair et sombre</li>
+    </ul>
+
+    <h3>Sécurité et données</h3>
+    <div class="callout callout-warning">
+      <div class="callout-icon">🔒</div>
+      <div class="callout-body">
+        <strong>Données 100 % locales en V1</strong>
+        Toutes les données (photos, articles, paramètres) sont stockées uniquement sur l'appareil.
+        Aucune donnée personnelle n'est transmise à des serveurs tiers sauf l'appel météo
+        (Open-Meteo, API publique sans authentification).
+      </div>
+    </div>
+    <ul>
+      <li>Photos copiées dans le répertoire interne de l'application (non accessibles depuis d'autres apps)</li>
+      <li>Base de données SQLite chiffrée via SQLDelight</li>
+      <li>Aucune permission réseau sauf pour l'API météo</li>
+    </ul>
+
+    <h3>Fiabilité</h3>
+    <ul>
+      <li>Fonctionnement hors-ligne complet (hors bandeau météo)</li>
+      <li>Aucune perte de données en cas de fermeture forcée de l'application</li>
+      <li>Écrans de gestion d'état vide dans tous les cas (loading / vide / erreur)</li>
+    </ul>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       7. CONTRAINTES TECHNIQUES
+  ══════════════════════════════════════════════════════ -->
+  <section id="technique">
+    <div class="section-number">07</div>
+    <h2>Contraintes techniques</h2>
+
+    <h3>Stack technologique</h3>
+    <div class="tech-grid">
+      <div class="tech-item">
+        <div class="tech-name">Kotlin</div>
+        <div class="tech-ver">2.0.21</div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-name">KMP</div>
+        <div class="tech-ver">Multiplateforme</div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-name">Jetpack Compose</div>
+        <div class="tech-ver">BOM 2024.10</div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-name">Material 3</div>
+        <div class="tech-ver">Dynamic theming</div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-name">SQLDelight</div>
+        <div class="tech-ver">2.0.2</div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-name">Ktor</div>
+        <div class="tech-ver">2.3.12</div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-name">Koin</div>
+        <div class="tech-ver">3.5.6</div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-name">Coil</div>
+        <div class="tech-ver">2.7.0</div>
+      </div>
+    </div>
+
+    <h3>Architecture</h3>
+    <ul>
+      <li><strong>Pattern :</strong> Clean Architecture — Data / Domain / Presentation</li>
+      <li><strong>Module partagé :</strong> ViewModels, UseCases, Repositories, modèles de données</li>
+      <li><strong>Module Android :</strong> UI Compose uniquement, sans logique métier</li>
+      <li><strong>Navigation :</strong> Jetpack Navigation Compose avec état de la pile préservé</li>
+      <li><strong>Injection de dépendances :</strong> Koin (singleton SettingsViewModel partagé entre écrans)</li>
+    </ul>
+
+    <h3>API externe</h3>
+    <div class="callout callout-success">
+      <div class="callout-icon">🌤️</div>
+      <div class="callout-body">
+        <strong>Open-Meteo (open-meteo.com)</strong>
+        API météo gratuite, sans clé d'authentification. Données : température, code météo,
+        humidité. Localisation via coordonnées GPS de l'appareil. En cas d'échec réseau,
+        le bandeau météo est masqué sans bloquer l'application.
+      </div>
+    </div>
+
+    <h3>Stockage des photos</h3>
+    <p>Les photos sélectionnées depuis la galerie sont copiées dans le répertoire privé
+    de l'application via la fonction <code>copyImageToInternalStorage()</code>.
+    L'URI d'origine n'est pas conservée. Le chemin interne est stocké dans la base de données.</p>
+
+    <h3>Partage de fichiers — FileProvider</h3>
+    <p>Le partage de tenues (F-16) expose les photos via <code>androidx.core.content.FileProvider</code>
+    avec l'autorité <code>{packageName}.fileprovider</code>. Les URIs générées sont accordées en lecture
+    temporaire à l'application cible (flag <code>FLAG_GRANT_READ_URI_PERMISSION</code>).
+    Aucune permission WRITE_EXTERNAL_STORAGE n'est requise.</p>
+
+    <h3>Persistance des paramètres</h3>
+    <p>Les préférences utilisateur (photo de profil) sont persistées via l'interface <code>SettingsStorage</code>
+    définie dans le module partagé. L'implémentation Android utilise <code>SharedPreferences</code>
+    (fichier <code>closetmixer_prefs</code>). Ce patron permet une future implémentation iOS
+    (NSUserDefaults) sans modifier le code partagé.</p>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       8. DESIGN SYSTEM
+  ══════════════════════════════════════════════════════ -->
+  <section id="design">
+    <div class="section-number">08</div>
+    <h2>Charte graphique et design system</h2>
+
+    <h3>Identité visuelle — Stitch "Luxury Minimalism"</h3>
+    <p>L'interface s'inspire des applications de mode haut de gamme. L'esthétique repose sur
+    la sobriété, les espaces généreux et les contrastes chauds.</p>
+
+    <h3>Palette de couleurs</h3>
+    <table class="feat-table">
+      <thead>
+        <tr><th>Token</th><th>Mode clair</th><th>Mode sombre</th><th>Usage</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Primary</td>
+          <td><span style="display:inline-flex;align-items:center;gap:6px"><span style="width:16px;height:16px;background:#735C00;border-radius:3px;display:inline-block"></span>#735C00</span></td>
+          <td><span style="display:inline-flex;align-items:center;gap:6px"><span style="width:16px;height:16px;background:#E9C349;border-radius:3px;display:inline-block"></span>#E9C349</span></td>
+          <td>Titres, boutons, accents</td>
+        </tr>
+        <tr>
+          <td>PrimaryContainer</td>
+          <td><span style="display:inline-flex;align-items:center;gap:6px"><span style="width:16px;height:16px;background:#D4AF37;border-radius:3px;display:inline-block"></span>#D4AF37</span></td>
+          <td><span style="display:inline-flex;align-items:center;gap:6px"><span style="width:16px;height:16px;background:#574500;border-radius:3px;display:inline-block"></span>#574500</span></td>
+          <td>Chips actifs, indicateur nav</td>
+        </tr>
+        <tr>
+          <td>Background / Surface</td>
+          <td><span style="display:inline-flex;align-items:center;gap:6px"><span style="width:16px;height:16px;background:#FAF9F7;border-radius:3px;display:inline-block;border:1px solid #ddd"></span>#FAF9F7</span></td>
+          <td><span style="display:inline-flex;align-items:center;gap:6px"><span style="width:16px;height:16px;background:#1A1C1B;border-radius:3px;display:inline-block"></span>#1A1C1B</span></td>
+          <td>Fond général</td>
+        </tr>
+        <tr>
+          <td>SurfaceVariant</td>
+          <td><span style="display:inline-flex;align-items:center;gap:6px"><span style="width:16px;height:16px;background:#E3E2E0;border-radius:3px;display:inline-block"></span>#E3E2E0</span></td>
+          <td><span style="display:inline-flex;align-items:center;gap:6px"><span style="width:16px;height:16px;background:#4D4635;border-radius:3px;display:inline-block"></span>#4D4635</span></td>
+          <td>Cartes, chips inactifs</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Typographie</h3>
+    <table class="feat-table">
+      <thead><tr><th>Usage</th><th>Famille</th><th>Taille</th><th>Graisse</th></tr></thead>
+      <tbody>
+        <tr><td>Display (titre app)</td><td>Serif (Georgia)</td><td>28–40 sp</td><td>SemiBold / Bold</td></tr>
+        <tr><td>Headline (titres écrans)</td><td>Serif (Georgia)</td><td>22–32 sp</td><td>Medium / SemiBold</td></tr>
+        <tr><td>Title (sections)</td><td>Sans-serif (Roboto)</td><td>14–18 sp</td><td>SemiBold</td></tr>
+        <tr><td>Body (texte courant)</td><td>Sans-serif (Roboto)</td><td>14–18 sp</td><td>Normal</td></tr>
+        <tr><td>Label (chips, méta)</td><td>Sans-serif (Roboto)</td><td>11–14 sp</td><td>Medium / SemiBold</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Composants clés</h3>
+    <ul>
+      <li><strong>Carte article :</strong> ratio 3:4, coins 16dp, ombre ambiante légère, bouton favori superposé</li>
+      <li><strong>Chips :</strong> forme pilule (CircleShape), or actif, gris inactif, sans bordure</li>
+      <li><strong>Navigation inférieure :</strong> indicateur secondaryContainer, 5 items, élévation = 0</li>
+      <li><strong>Formulaires :</strong> OutlinedTextField avec coins 12dp, fond surfaceVariant teinté</li>
+      <li><strong>Bouton principal :</strong> pleine largeur, hauteur 56dp, coins 16dp, fond primary</li>
+    </ul>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       9. JALONS
+  ══════════════════════════════════════════════════════ -->
+  <section id="jalons">
+    <div class="section-number">09</div>
+    <h2>Jalons et livrables</h2>
+
+    <ul class="timeline">
+      <li>
+        <span class="phase">Cm-mob_001 — Fondations</span>
+        <span class="duration">✓ Livré</span>
+        <ul class="items">
+          <li>Architecture KMP, base de données SQLDelight</li>
+          <li>Modèles de domaine (Article, Tenue, Voyage, CalendarEntry)</li>
+          <li>ViewModels et UseCases de base</li>
+          <li>Navigation et structure de l'app Android</li>
+        </ul>
+      </li>
+      <li>
+        <span class="phase">Cm-mob_002 — Interface Stitch</span>
+        <span class="duration">✓ Livré — Mai 2026</span>
+        <ul class="items">
+          <li>Design system complet (palette, typographie, composants)</li>
+          <li>Refonte des 6 écrans selon le design Stitch</li>
+          <li>Photo de profil (Garde-robe + Paramètres)</li>
+          <li>Résolution des conflits de ressources et erreurs de compilation</li>
+        </ul>
+      </li>
+      <li>
+        <span class="phase">Cm-mob_003 — Fonctionnalités avancées</span>
+        <span class="duration">✓ Livré — Juin 2026</span>
+        <ul class="items">
+          <li>Valise virtuelle complète : création voyage, vue détail, ajout/retrait d'articles (F-14)</li>
+          <li>Suppression d'un article par appui long avec confirmation (F-18)</li>
+          <li>Photo de profil persistante entre sessions via SharedPreferences (F-19)</li>
+          <li>Météo en temps réel — Open-Meteo + LocationManager natif (F-05)</li>
+          <li>Auto-génération de tenue au chargement de l'écran (F-20)</li>
+          <li>Harmonie métal/couleur dans la sélection des bijoux (F-13)</li>
+          <li>Partage de tenues — Intent natif Android + FileProvider (F-16)</li>
+          <li>Sous-catégories vêtements étendues : chemise, pull, pantalon, jupe, short (F-21)</li>
+          <li>Correction du sélecteur vêtements plein corps (robe, abaya, kaftan, sari) sans bas (F-04)</li>
+        </ul>
+      </li>
+      <li>
+        <span class="phase">Cm-mob_004 — Publication</span>
+        <span class="duration">À planifier</span>
+        <ul class="items">
+          <li>Tests unitaires et tests UI (Compose Test)</li>
+          <li>Support RTL complet pour l'arabe</li>
+          <li>Publication sur Google Play (closed beta)</li>
+          <li>Analyse de performance et correction de régressions</li>
+          <li>Début du portage iOS (KMP)</li>
+        </ul>
+      </li>
+    </ul>
+
+    <h3>Livrables par jalon</h3>
+    <table class="feat-table">
+      <thead><tr><th>Livrable</th><th>Format</th><th>Jalon</th></tr></thead>
+      <tbody>
+        <tr><td>APK de démonstration signé</td><td>.apk / .aab</td><td>Cm-mob_002</td></tr>
+        <tr><td>Cahier des charges MOA (ce document)</td><td>HTML</td><td>Cm-mob_002 → mis à jour Cm-mob_003</td></tr>
+        <tr><td>Spécification technique MOE</td><td>À créer</td><td>Cm-mob_003</td></tr>
+        <tr><td>Code source versionné</td><td>GitHub — feature branches</td><td>Continu</td></tr>
+        <tr><td>Rapport de tests</td><td>À définir</td><td>Cm-mob_004</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       10. GLOSSAIRE
+  ══════════════════════════════════════════════════════ -->
+  <section id="glossaire">
+    <div class="section-number">10</div>
+    <h2>Glossaire</h2>
+
+    <table class="feat-table">
+      <thead><tr><th>Terme</th><th>Définition</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Article</strong></td><td>Pièce de garde-robe (vêtement, bijou, chaussure, accessoire…) photographiée et cataloguée dans l'application.</td></tr>
+        <tr><td><strong>Tenue</strong></td><td>Combinaison d'articles (haut + bas + chaussure + bijou) générée ou sélectionnée manuellement.</td></tr>
+        <tr><td><strong>Style culturel</strong></td><td>Filtre de génération reflétant une identité vestimentaire : Modest (couvert), K-Fashion (coréen), J-Fashion (japonais), Traditionnel, Neutre.</td></tr>
+        <tr><td><strong>Occasion</strong></td><td>Contexte d'usage d'une tenue : Travail, Casual, Soirée, Voyage, Sport.</td></tr>
+        <tr><td><strong>KMP</strong></td><td>Kotlin Multiplatform — technologie permettant de partager le code métier entre Android et iOS.</td></tr>
+        <tr><td><strong>MOA</strong></td><td>Maîtrise d'Ouvrage — entité commanditaire définissant les besoins fonctionnels du projet.</td></tr>
+        <tr><td><strong>MOE</strong></td><td>Maîtrise d'Œuvre — entité responsable de la réalisation technique.</td></tr>
+        <tr><td><strong>MoSCoW</strong></td><td>Méthode de priorisation : Must have / Should have / Could have / Won't have.</td></tr>
+        <tr><td><strong>RTL</strong></td><td>Right-To-Left — sens d'écriture de droite à gauche, utilisé pour l'arabe et d'autres langues sémitiques.</td></tr>
+        <tr><td><strong>Stitch</strong></td><td>Nom du design system maison de ClosetMixer, fondé sur l'esthétique "Luxury Minimalism".</td></tr>
+        <tr><td><strong>Open-Meteo</strong></td><td>API météorologique ouverte (open-meteo.com) utilisée pour récupérer la température et le code météo local.</td></tr>
+        <tr><td><strong>SQLDelight</strong></td><td>Bibliothèque Kotlin de gestion de base de données SQLite, compatible KMP.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    <span>ClosetMixer — Cahier des charges MOA v1.1 — Cm-mob_003</span>
+    <span>Juin 2026 — Confidentiel</span>
+  </footer>
+
+</div>
+</body>
+</html>

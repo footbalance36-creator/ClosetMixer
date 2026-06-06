@@ -34,6 +34,7 @@ class OutfitViewModel(
         scope.launch {
             runCatching { getWeather.execute(lat, lon) }
                 .onSuccess { weather -> _uiState.update { it.copy(weather = weather) } }
+            // weather failure is silent — banner simply won't appear when offline
         }
     }
 

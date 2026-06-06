@@ -42,6 +42,14 @@ startKoin {
 }
 ```
 
+## ⚠️ Pré-production — Avant toute modification Android
+
+- Lire le fichier cible en entier avant d'éditer.
+- Vérifier tous les imports après modification (inutilisés = erreur de compilation).
+- Ne pas modifier `fetchAndLoadWeather`, `WeatherApi`, `WeatherDto` sans confirmer que le nom de champ API correspond exactement à ce que retourne Open-Meteo.
+- Ne pas ajouter de complexité (scope, delay, fallback) dans un fichier fonctionnel sans besoin explicite.
+- Relire l'état final complet du fichier avant de conclure.
+
 ## Règles critiques
 - `koinInject()` dans tous les Composables (PAS `koinViewModel()`)
 - Les ViewModels KMP sont `single{}` dans Koin, pas `factory{}`

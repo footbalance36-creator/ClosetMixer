@@ -29,6 +29,14 @@
 - `ArticleCard` — card article avec photo (`AsyncImage` Coil) + métadonnées
 - `ColorSwatch` — cercle de couleur cliquable avec check icon
 
+### ⚠️ Pré-production — Règles anti-régression UI
+
+- Toute modification d'un Screen existant nécessite la lecture complète du fichier avant édition.
+- Ne modifier que les composables concernés par la tâche — ne pas "améliorer" le reste.
+- Après modification : vérifier que le rendu visuel des autres sections du screen n'est pas affecté.
+- Les imports Compose inutilisés provoquent des warnings voire des erreurs — les supprimer.
+- Ne pas changer le comportement d'un `LaunchedEffect` existant sans tracer le flux complet.
+
 ### Règles Compose
 - Chaque screen reçoit son ViewModel via `koinInject()` (PAS `koinViewModel()`)
 - États locaux : `remember { mutableStateOf(...) }`

@@ -1,5 +1,6 @@
 package com.closetmixer.presentation.viewmodel
 
+import com.closetmixer.data.storage.SettingsStorage
 import com.closetmixer.domain.model.AppLanguage
 import com.closetmixer.domain.model.CulturalStyle
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,9 +15,11 @@ data class SettingsUiState(
     val profilePhotoPath: String = ""
 )
 
-class SettingsViewModel {
+class SettingsViewModel(private val storage: SettingsStorage) {
 
-    private val _uiState = MutableStateFlow(SettingsUiState())
+    private val _uiState = MutableStateFlow(
+        SettingsUiState(profilePhotoPath = storage.loadProfilePhoto())
+    )
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
     fun setLanguage(language: AppLanguage) {
@@ -32,6 +35,7 @@ class SettingsViewModel {
     }
 
     fun setProfilePhoto(path: String) {
+        storage.saveProfilePhoto(path)
         _uiState.update { it.copy(profilePhotoPath = path) }
     }
 }

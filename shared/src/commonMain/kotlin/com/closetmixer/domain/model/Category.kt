@@ -12,7 +12,11 @@ enum class ArticleCategory(val key: String) {
 
 enum class ArticleSubCategory(val category: ArticleCategory, val key: String) {
     HAUT(ArticleCategory.VETEMENT, "haut"),
-    BAS(ArticleCategory.VETEMENT, "bas"),
+    CHEMISE(ArticleCategory.VETEMENT, "chemise"),
+    PULL(ArticleCategory.VETEMENT, "pull"),
+    PANTALON(ArticleCategory.VETEMENT, "pantalon"),
+    JUPE(ArticleCategory.VETEMENT, "jupe"),
+    SHORT(ArticleCategory.VETEMENT, "short"),
     ROBE(ArticleCategory.VETEMENT, "robe"),
     VESTE(ArticleCategory.VETEMENT, "veste"),
     MANTEAU(ArticleCategory.VETEMENT, "manteau"),

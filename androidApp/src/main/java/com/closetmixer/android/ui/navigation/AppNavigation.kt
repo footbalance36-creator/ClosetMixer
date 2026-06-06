@@ -1,5 +1,6 @@
 package com.closetmixer.android.ui.navigation
 
+import android.content.Context
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Analytics
@@ -16,8 +17,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -27,13 +30,18 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.closetmixer.android.ui.screen.AddArticleScreen
 import com.closetmixer.android.ui.screen.CalendarScreen
+import com.closetmixer.android.ui.screen.OnboardingScreen
 import com.closetmixer.android.ui.screen.OutfitScreen
 import com.closetmixer.android.ui.screen.SettingsScreen
 import com.closetmixer.android.ui.screen.StatsScreen
 import com.closetmixer.android.ui.screen.VoyageScreen
 import com.closetmixer.android.ui.screen.WardrobeScreen
 
+private const val PREF_FILE   = "closetmixer_prefs"
+private const val KEY_ONBOARDING = "onboarding_done"
+
 sealed class Screen(val route: String, val label: String) {
+    object Onboarding: Screen("onboarding",  "")
     object Wardrobe  : Screen("wardrobe",    "Garde-robe")
     object Outfit    : Screen("outfit",      "Tenues")
     object Calendar  : Screen("calendar",   "Calendrier")
@@ -55,6 +63,13 @@ private val bottomItems = listOf(
 
 @Composable
 fun AppNavigation() {
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences(PREF_FILE, Context.MODE_PRIVATE) }
+    val startDestination = remember {
+        if (prefs.getBoolean(KEY_ONBOARDING, false)) Screen.Wardrobe.route
+        else Screen.Onboarding.route
+    }
+
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -109,9 +124,19 @@ fun AppNavigation() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Wardrobe.route,
+            startDestination = startDestination,
             modifier = Modifier.padding(innerPadding)
         ) {
+            composable(Screen.Onboarding.route) {
+                OnboardingScreen(
+                    onFinish = {
+                        prefs.edit().putBoolean(KEY_ONBOARDING, true).apply()
+                        navController.navigate(Screen.Wardrobe.route) {
+                            popUpTo(Screen.Onboarding.route) { inclusive = true }
+                        }
+                    }
+                )
+            }
             composable(Screen.Wardrobe.route) {
                 WardrobeScreen(
                     onAddClick = { navController.navigate(Screen.AddArticle.route) }

@@ -126,7 +126,10 @@ INNER JOIN VoyageArticle va ON a.id = va.articleId
 WHERE va.voyageId = ?;
 
 insertVoyageArticle:
-INSERT INTO VoyageArticle(voyageId, articleId) VALUES (?, ?);
+INSERT OR IGNORE INTO VoyageArticle(voyageId, articleId) VALUES (?, ?);
+
+removeVoyageArticle:
+DELETE FROM VoyageArticle WHERE voyageId = ? AND articleId = ?;
 
 deleteVoyage:
 DELETE FROM Voyage WHERE id = ?;

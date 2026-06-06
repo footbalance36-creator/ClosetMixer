@@ -32,6 +32,30 @@ presentation/
                 VoyageViewModel, StatsViewModel, SettingsViewModel
 ```
 
+## ⚠️ Règles qualité — Pré-production (OBLIGATOIRES)
+
+> Le projet est en phase pré-production. Une régression bloque la livraison.
+
+### Avant de commencer toute tâche
+1. **Lire en entier** chaque fichier à modifier — jamais de modification sans lecture préalable complète.
+2. **Identifier les dépendances** — quels Screens, ViewModels, Repos, DI utilisent ce code ?
+3. **Tracer le flux complet** — UI → ViewModel → UseCase → Repository → API/DB → retour UI.
+4. **Lister les risques** — qu'est-ce qui peut casser si ce fichier change ?
+5. **Périmètre strict** — ne toucher que les fichiers nécessaires à la tâche demandée.
+
+### Avant de déclarer "c'est fait"
+- Relire chaque fichier modifié dans son **état final complet** (pas seulement le diff).
+- Vérifier que tous les imports sont utilisés et qu'il n'en manque aucun.
+- **Ne jamais changer un nom de champ API** sans confirmer ce que l'API retourne réellement — si l'ancien code fonctionnait, le conserver.
+- En cas de doute sur un changement, **revenir à la version originale fonctionnelle**.
+
+### Interdictions
+- Ne pas ajouter de complexité non demandée (fallback, abstraction, refactoring) sans validation explicite.
+- Ne pas modifier du code fonctionnel adjacent dans le même commit qu'une nouvelle fonctionnalité.
+- Ne pas introduire de changement dans un fichier hors périmètre de la tâche.
+
+---
+
 ## Règles fondamentales
 - Aucun import Android dans `commonMain`
 - Les `expect class` sont uniquement dans `commonMain/data/db/`
