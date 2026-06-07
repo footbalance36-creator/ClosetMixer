@@ -36,7 +36,6 @@ import androidx.compose.material.icons.outlined.Style
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -90,13 +89,11 @@ fun SettingsScreen(viewModel: SettingsViewModel = koinInject()) {
         }
     }
 
-    Scaffold { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-        ) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
             // ── Top bar ────────────────────────────────────────────────────
             Row(
                 modifier = Modifier
@@ -398,7 +395,6 @@ fun SettingsScreen(viewModel: SettingsViewModel = koinInject()) {
                 Spacer(Modifier.height(32.dp))
             }
         }
-    }
 }
 
 @Composable

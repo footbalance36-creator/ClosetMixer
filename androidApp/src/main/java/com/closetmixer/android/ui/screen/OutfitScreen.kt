@@ -32,7 +32,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -87,13 +86,11 @@ fun OutfitScreen(viewModel: OutfitViewModel = koinInject()) {
         else locationLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
     }
 
-    Scaffold { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-        ) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
             // ── Top bar ────────────────────────────────────────────────────
             Row(
                 modifier = Modifier
@@ -284,7 +281,6 @@ fun OutfitScreen(viewModel: OutfitViewModel = koinInject()) {
 
             Spacer(Modifier.height(32.dp))
         }
-    }
 }
 
 @android.annotation.SuppressLint("MissingPermission")

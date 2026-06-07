@@ -21,7 +21,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -61,13 +60,11 @@ fun CalendarScreen(viewModel: CalendarViewModel = koinInject()) {
         runCatching { LocalDate.parse(it).dayOfMonth }.getOrNull()
     }.toSet()
 
-    Scaffold { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-        ) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
             // ── Header ─────────────────────────────────────────────────────
             Row(
                 modifier = Modifier
@@ -191,5 +188,4 @@ fun CalendarScreen(viewModel: CalendarViewModel = koinInject()) {
 
             Spacer(Modifier.height(32.dp))
         }
-    }
 }
