@@ -1,8 +1,8 @@
 package com.closetmixer.presentation.viewmodel
 
+import com.closetmixer.data.model.Article
 import com.closetmixer.data.model.CalendarEntry
-import com.closetmixer.data.model.Tenue
-import com.closetmixer.data.repository.TenueRepository
+import com.closetmixer.domain.usecase.GetArticlesByCategoryUseCase
 import com.closetmixer.domain.usecase.GetWeatherUseCase
 import com.closetmixer.domain.usecase.PlanOutfitUseCase
 import kotlinx.coroutines.CoroutineScope
@@ -22,14 +22,14 @@ data class CalendarUiState(
     val selectedDate: String? = null,
     val currentMonth: String = "",
     val isLoading: Boolean = false,
-    val tenues: List<Tenue> = emptyList(),
-    val showTenuePicker: Boolean = false
+    val articles: List<Article> = emptyList(),
+    val showArticlePicker: Boolean = false
 )
 
 class CalendarViewModel(
     private val planOutfitUseCase: PlanOutfitUseCase,
     private val getWeatherUseCase: GetWeatherUseCase,
-    private val tenueRepo: TenueRepository
+    private val getArticlesUseCase: GetArticlesByCategoryUseCase
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val _uiState = MutableStateFlow(CalendarUiState())
@@ -68,19 +68,19 @@ class CalendarViewModel(
 
     fun openPicker(date: String) {
         scope.launch {
-            val tenues = tenueRepo.getAllTenues()
-            _uiState.update { it.copy(selectedDate = date, tenues = tenues, showTenuePicker = true) }
+            val articles = getArticlesUseCase.execute()
+            _uiState.update { it.copy(selectedDate = date, articles = articles, showArticlePicker = true) }
         }
     }
 
     fun closePicker() {
-        _uiState.update { it.copy(showTenuePicker = false) }
+        _uiState.update { it.copy(showArticlePicker = false) }
     }
 
-    fun savePlannedOutfit(date: String, tenueId: String) {
+    fun savePlannedOutfit(date: String, articleId: String) {
         scope.launch {
-            planOutfitUseCase.execute(date, tenueId)
-            _uiState.update { it.copy(showTenuePicker = false) }
+            planOutfitUseCase.execute(date, articleId)
+            _uiState.update { it.copy(showArticlePicker = false) }
             loadMonth(_uiState.value.currentMonth)
         }
     }

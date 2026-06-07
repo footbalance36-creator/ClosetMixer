@@ -51,7 +51,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.closetmixer.data.model.Tenue
+import com.closetmixer.data.model.Article
 import com.closetmixer.presentation.viewmodel.CalendarViewModel
 import org.koin.compose.koinInject
 import java.time.LocalDate
@@ -87,13 +87,13 @@ fun CalendarScreen(viewModel: CalendarViewModel = koinInject()) {
         runCatching { LocalDate.parse(it).dayOfMonth }.getOrNull()
     }.toSet()
 
-    // ── Tenue picker bottom sheet ──────────────────────────────────────────
-    if (state.showTenuePicker) {
+    // ── Article picker bottom sheet ───────────────────────────────────────
+    if (state.showArticlePicker) {
         ModalBottomSheet(onDismissRequest = { viewModel.closePicker() }) {
-            TenuePickerContent(
-                tenues = state.tenues,
-                onSelect = { tenueId ->
-                    state.selectedDate?.let { date -> viewModel.savePlannedOutfit(date, tenueId) }
+            ArticlePickerContent(
+                articles = state.articles,
+                onSelect = { articleId ->
+                    state.selectedDate?.let { date -> viewModel.savePlannedOutfit(date, articleId) }
                 }
             )
         }
@@ -323,18 +323,18 @@ fun CalendarScreen(viewModel: CalendarViewModel = koinInject()) {
 }
 
 @Composable
-private fun TenuePickerContent(
-    tenues: List<Tenue>,
+private fun ArticlePickerContent(
+    articles: List<Article>,
     onSelect: (String) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
-            "Choisir une tenue",
+            "Choisir un article",
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)
         )
 
-        if (tenues.isEmpty()) {
+        if (articles.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -342,7 +342,7 @@ private fun TenuePickerContent(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    "Aucune tenue créée.\nRendez-vous dans l'onglet Tenues\npour en créer une.",
+                    "Aucun article dans votre garde-robe.\nAjoutez des vêtements depuis l'onglet Garde-robe.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
@@ -350,30 +350,30 @@ private fun TenuePickerContent(
             }
         } else {
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                items(tenues) { tenue ->
+                items(articles) { article ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onSelect(tenue.id) }
+                            .clickable { onSelect(article.id) }
                             .padding(horizontal = 20.dp, vertical = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                tenue.nom,
+                                article.sousCategorie.replaceFirstChar { it.uppercase() },
                                 style = MaterialTheme.typography.bodyLarge
                             )
-                            val detail = listOfNotNull(tenue.occasion, tenue.saison)
-                                .joinToString(" · ")
-                            if (detail.isNotEmpty()) {
-                                Text(
-                                    detail,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
+                            val detail = listOfNotNull(
+                                article.categorie.replaceFirstChar { it.uppercase() },
+                                article.couleur
+                            ).joinToString(" · ")
+                            Text(
+                                detail,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
-                        if (tenue.isFavori == 1L) {
+                        if (article.isFavori == 1L) {
                             Icon(
                                 Icons.Outlined.FavoriteBorder,
                                 contentDescription = null,
