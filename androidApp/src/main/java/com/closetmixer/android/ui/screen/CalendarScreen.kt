@@ -27,31 +27,39 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.closetmixer.data.model.Article
+import com.closetmixer.data.model.CalendarEntry
+import com.closetmixer.data.model.Tenue
+import com.closetmixer.domain.usecase.GeneratedOutfit
 import com.closetmixer.presentation.viewmodel.CalendarViewModel
 import org.koin.compose.koinInject
 import java.time.LocalDate
@@ -81,19 +89,27 @@ fun CalendarScreen(viewModel: CalendarViewModel = koinInject()) {
     }
 
     val daysInMonth = yearMonth.lengthOfMonth()
-    val firstDayOfWeek = yearMonth.atDay(1).dayOfWeek.value % 7 // 0=Sun
+    val firstDayOfWeek = yearMonth.atDay(1).dayOfWeek.value % 7
 
-    val plannedDays = state.entries.keys.mapNotNull {
+    val plannedDays = state.monthEntries.keys.mapNotNull {
         runCatching { LocalDate.parse(it).dayOfMonth }.getOrNull()
     }.toSet()
 
-    // ── Article picker bottom sheet ───────────────────────────────────────
-    if (state.showArticlePicker) {
-        ModalBottomSheet(onDismissRequest = { viewModel.closePicker() }) {
-            ArticlePickerContent(
-                articles = state.articles,
-                onSelect = { articleId ->
-                    state.selectedDate?.let { date -> viewModel.savePlannedOutfit(date, articleId) }
+    if (state.showSheet) {
+        ModalBottomSheet(onDismissRequest = { viewModel.closeSheet() }) {
+            val dateLabel = state.selectedDate?.let { formatDate(it) } ?: ""
+            TenuePickerContent(
+                dateLabel = dateLabel,
+                savedTenues = state.savedTenues,
+                isSavedTenuesLoading = state.isSavedTenuesLoading,
+                generatedOutfit = state.generatedOutfit,
+                isGenerating = state.isGenerating,
+                onSelectTenue = { tenueId ->
+                    state.selectedDate?.let { viewModel.assignTenue(it, tenueId) }
+                },
+                onGenerate = { viewModel.generateOutfit() },
+                onUseGenerated = {
+                    state.selectedDate?.let { viewModel.useGeneratedOutfit(it) }
                 }
             )
         }
@@ -104,7 +120,6 @@ fun CalendarScreen(viewModel: CalendarViewModel = koinInject()) {
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        // ── Header with month navigation ───────────────────────────────────
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -117,7 +132,6 @@ fun CalendarScreen(viewModel: CalendarViewModel = koinInject()) {
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.padding(start = 12.dp)
             )
-
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = { viewModel.prevMonth() }) {
                     Icon(
@@ -142,7 +156,6 @@ fun CalendarScreen(viewModel: CalendarViewModel = koinInject()) {
             }
         }
 
-        // ── Day of week labels ─────────────────────────────────────────────
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -162,7 +175,6 @@ fun CalendarScreen(viewModel: CalendarViewModel = koinInject()) {
 
         Spacer(Modifier.height(8.dp))
 
-        // ── Calendar grid ──────────────────────────────────────────────────
         val cells = buildList {
             repeat(firstDayOfWeek) { add(0) }
             addAll(1..daysInMonth)
@@ -228,73 +240,20 @@ fun CalendarScreen(viewModel: CalendarViewModel = koinInject()) {
 
         Spacer(Modifier.height(16.dp))
 
-        // ── Selected day panel ─────────────────────────────────────────────
         selectedDay?.let { day ->
             val dateStr = "${state.currentMonth}-${day.toString().padStart(2, '0')}"
-            val entry = state.entries[dateStr]
-            val dateLabel = runCatching {
-                LocalDate.parse(dateStr)
-                    .format(DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.FRENCH))
-                    .replaceFirstChar { it.uppercase() }
-            }.getOrElse { dateStr }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .padding(16.dp)
-            ) {
-                Text(
-                    dateLabel,
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        letterSpacing = 0.5.sp, fontSize = 12.sp
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.70f)
-                )
-                Spacer(Modifier.height(12.dp))
-
-                if (entry != null) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Outlined.CheckCircle,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            "Tenue planifiée",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    TextButton(
-                        onClick = { viewModel.openPicker(dateStr) },
-                        modifier = Modifier.align(Alignment.End)
-                    ) {
-                        Icon(Icons.Outlined.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(Modifier.width(4.dp))
-                        Text("Modifier")
-                    }
-                } else {
-                    Button(
-                        onClick = { viewModel.openPicker(dateStr) },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(Icons.Default.Add, contentDescription = null)
-                        Spacer(Modifier.width(8.dp))
-                        Text("Planifier une tenue")
-                    }
-                }
-            }
+            val entry = state.monthEntries[dateStr]
+            SelectedDayPanel(
+                dateLabel = formatDate(dateStr),
+                entry = entry,
+                onPlanClick = { viewModel.openSheet(dateStr) },
+                onModifyClick = { viewModel.openSheet(dateStr) },
+                onRemoveClick = { viewModel.removeTenue(dateStr) }
+            )
         }
 
         Spacer(Modifier.height(16.dp))
 
-        // ── Month summary ──────────────────────────────────────────────────
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -312,7 +271,7 @@ fun CalendarScreen(viewModel: CalendarViewModel = koinInject()) {
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                "${state.entries.size} tenues planifiées",
+                "${state.monthEntries.size} tenues planifiées",
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -323,72 +282,283 @@ fun CalendarScreen(viewModel: CalendarViewModel = koinInject()) {
 }
 
 @Composable
-private fun ArticlePickerContent(
-    articles: List<Article>,
-    onSelect: (String) -> Unit
+private fun SelectedDayPanel(
+    dateLabel: String,
+    entry: Pair<CalendarEntry, List<Article>>?,
+    onPlanClick: () -> Unit,
+    onModifyClick: () -> Unit,
+    onRemoveClick: () -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
         Text(
-            "Choisir un article",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)
+            dateLabel,
+            style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 0.5.sp, fontSize = 12.sp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.70f)
         )
 
-        if (articles.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(40.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    "Aucun article dans votre garde-robe.\nAjoutez des vêtements depuis l'onglet Garde-robe.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
-                )
+        if (entry?.first?.tenueId != null) {
+            PlannedOutfitMiniatures(articles = entry.second)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = onModifyClick, modifier = Modifier.weight(1f)) {
+                    Text("Modifier")
+                }
+                OutlinedButton(
+                    onClick = onRemoveClick,
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Retirer")
+                }
             }
         } else {
-            LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                items(articles) { article ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onSelect(article.id) }
-                            .padding(horizontal = 20.dp, vertical = 14.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                article.sousCategorie.replaceFirstChar { it.uppercase() },
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                            val detail = listOfNotNull(
-                                article.categorie.replaceFirstChar { it.uppercase() },
-                                article.couleur
-                            ).joinToString(" · ")
-                            Text(
-                                detail,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        if (article.isFavori == 1L) {
-                            Icon(
-                                Icons.Outlined.FavoriteBorder,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                    }
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 20.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
-                    )
-                }
-                item { Spacer(Modifier.height(32.dp)) }
+            Button(onClick = onPlanClick, modifier = Modifier.fillMaxWidth()) {
+                Icon(Icons.Default.Add, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text("Planifier une tenue")
             }
         }
     }
 }
+
+@Composable
+private fun PlannedOutfitMiniatures(articles: List<Article>) {
+    val slotLabels = listOf("Haut", "Bas", "Chaussure", "Bijou")
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        slotLabels.forEachIndexed { index, label ->
+            val article = articles.getOrNull(index)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(1f)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(3f / 4f)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.surface)
+                ) {
+                    if (article != null) {
+                        AsyncImage(
+                            model = article.photoPath,
+                            contentDescription = article.sousCategorie,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } else {
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.outline,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+                }
+                Text(
+                    text = article?.sousCategorie ?: label,
+                    fontSize = 10.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TenuePickerContent(
+    dateLabel: String,
+    savedTenues: List<Pair<Tenue, List<Article>>>,
+    isSavedTenuesLoading: Boolean,
+    generatedOutfit: GeneratedOutfit?,
+    isGenerating: Boolean,
+    onSelectTenue: (String) -> Unit,
+    onGenerate: () -> Unit,
+    onUseGenerated: () -> Unit
+) {
+    var selectedTab by rememberSaveable { mutableStateOf(0) }
+    val tabs = listOf("Tenues sauvegardées", "Générer une tenue")
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            "Choisir une tenue pour le $dateLabel",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)
+        )
+
+        TabRow(selectedTabIndex = selectedTab) {
+            tabs.forEachIndexed { index, title ->
+                Tab(
+                    selected = selectedTab == index,
+                    onClick = { selectedTab = index },
+                    text = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                )
+            }
+        }
+
+        when (selectedTab) {
+            0 -> SavedTenuesTab(
+                tenues = savedTenues,
+                isLoading = isSavedTenuesLoading,
+                onSelect = onSelectTenue
+            )
+            1 -> GenerateOutfitTab(
+                generatedOutfit = generatedOutfit,
+                isGenerating = isGenerating,
+                onGenerate = onGenerate,
+                onUseGenerated = onUseGenerated
+            )
+        }
+
+        Spacer(Modifier.height(32.dp))
+    }
+}
+
+@Composable
+private fun SavedTenuesTab(
+    tenues: List<Pair<Tenue, List<Article>>>,
+    isLoading: Boolean,
+    onSelect: (String) -> Unit
+) {
+    if (isLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(40.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+    } else if (tenues.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(40.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                "Aucune tenue sauvegardée.\nCréez des tenues depuis l'onglet Tenues.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+        }
+    } else {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(320.dp)
+        ) {
+            items(tenues) { (tenue, articles) ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onSelect(tenue.id) }
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    articles.take(4).forEach { article ->
+                        AsyncImage(
+                            model = article.photoPath,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                        )
+                    }
+                    repeat(maxOf(0, 4 - articles.size)) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                        )
+                    }
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = tenue.nom,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun GenerateOutfitTab(
+    generatedOutfit: GeneratedOutfit?,
+    isGenerating: Boolean,
+    onGenerate: () -> Unit,
+    onUseGenerated: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Button(
+            onClick = onGenerate,
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !isGenerating
+        ) {
+            if (isGenerating) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(18.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+                Spacer(Modifier.width(8.dp))
+            }
+            Text(if (generatedOutfit == null) "Générer selon la météo du jour" else "Régénérer")
+        }
+
+        if (generatedOutfit != null) {
+            PlannedOutfitMiniatures(
+                articles = listOfNotNull(
+                    generatedOutfit.haut,
+                    generatedOutfit.bas,
+                    generatedOutfit.chaussure,
+                    generatedOutfit.bijou
+                )
+            )
+            Button(onClick = onUseGenerated, modifier = Modifier.fillMaxWidth()) {
+                Text("Utiliser cette tenue")
+            }
+        }
+    }
+}
+
+private fun formatDate(dateStr: String): String =
+    runCatching {
+        LocalDate.parse(dateStr)
+            .format(DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.FRENCH))
+            .replaceFirstChar { it.uppercase() }
+    }.getOrElse { dateStr }

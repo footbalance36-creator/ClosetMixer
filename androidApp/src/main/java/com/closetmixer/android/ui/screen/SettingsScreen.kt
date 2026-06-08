@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Language
@@ -33,6 +34,7 @@ import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.Style
+import androidx.core.os.LocaleListCompat
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -58,6 +60,7 @@ import com.closetmixer.android.util.openPlayStorePage
 import com.closetmixer.android.util.requestInAppReview
 import com.closetmixer.domain.model.AppLanguage
 import com.closetmixer.domain.model.CulturalStyle
+import com.closetmixer.domain.model.Gender
 import com.closetmixer.presentation.viewmodel.SettingsViewModel
 import org.koin.compose.koinInject
 
@@ -229,6 +232,60 @@ fun SettingsScreen(viewModel: SettingsViewModel = koinInject()) {
                         )
                     }
 
+                    // Gender picker
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(Icons.Outlined.Person, contentDescription = null,
+                                tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
+                            Text("Genre", style = MaterialTheme.typography.bodyMedium)
+                        }
+                        Spacer(Modifier.height(12.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Gender.entries.forEach { g ->
+                                val isSelected = state.gender == g
+                                Column(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(
+                                            if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
+                                            else MaterialTheme.colorScheme.surface
+                                        )
+                                        .border(
+                                            1.dp,
+                                            if (isSelected) MaterialTheme.colorScheme.primaryContainer
+                                            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                                            RoundedCornerShape(10.dp)
+                                        )
+                                        .clickable { viewModel.setGender(g) }
+                                        .padding(vertical = 10.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(g.emoji, style = MaterialTheme.typography.titleLarge)
+                                    Spacer(Modifier.height(4.dp))
+                                    Text(
+                                        g.label,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
+
                     // Cultural style chips
                     Column(
                         modifier = Modifier
@@ -303,7 +360,12 @@ fun SettingsScreen(viewModel: SettingsViewModel = koinInject()) {
                                                 else Color.Transparent,
                                                 RoundedCornerShape(10.dp)
                                             )
-                                            .clickable { viewModel.setLanguage(lang.lang) }
+                                            .clickable {
+                                            viewModel.setLanguage(lang.lang)
+                                            AppCompatDelegate.setApplicationLocales(
+                                                LocaleListCompat.forLanguageTags(lang.lang.code)
+                                            )
+                                        }
                                             .padding(vertical = 8.dp),
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {

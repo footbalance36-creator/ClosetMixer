@@ -1,8 +1,5 @@
 package com.closetmixer.android.ui.screen
 
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,19 +14,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AddCircleOutline
 import androidx.compose.material.icons.outlined.Checkroom
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -38,12 +37,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.closetmixer.android.ui.component.ArticleCard
 import com.closetmixer.android.ui.component.CategoryChips
-import com.closetmixer.android.util.copyImageToInternalStorage
+import com.closetmixer.android.ui.component.StitchChip
 import com.closetmixer.presentation.viewmodel.SettingsViewModel
 import com.closetmixer.presentation.viewmodel.WardrobeViewModel
 import org.koin.compose.koinInject
@@ -51,21 +49,12 @@ import org.koin.compose.koinInject
 @Composable
 fun WardrobeScreen(
     onAddClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {},
     viewModel: WardrobeViewModel = koinInject(),
     settingsViewModel: SettingsViewModel = koinInject()
 ) {
     val state by viewModel.uiState.collectAsState()
     val settings by settingsViewModel.uiState.collectAsState()
-    val context = LocalContext.current
-
-    val imagePicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let {
-            val path = copyImageToInternalStorage(context, it)
-            settingsViewModel.setProfilePhoto(path)
-        }
-    }
 
     Column(
         Modifier
@@ -90,7 +79,7 @@ fun WardrobeScreen(
                             .clip(CircleShape)
                             .border(1.5.dp, MaterialTheme.colorScheme.primaryContainer, CircleShape)
                             .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .clickable { imagePicker.launch("image/*") },
+                            .clickable { onSettingsClick() },
                         contentAlignment = Alignment.Center
                     ) {
                         if (settings.profilePhotoPath.isNotEmpty()) {
@@ -115,13 +104,23 @@ fun WardrobeScreen(
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
-                IconButton(onClick = onAddClick) {
-                    Icon(
-                        Icons.Outlined.AddCircleOutline,
-                        contentDescription = "Ajouter",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(32.dp)
-                    )
+                Row {
+                    IconButton(onClick = onSettingsClick) {
+                        Icon(
+                            Icons.Outlined.Settings,
+                            contentDescription = "Paramètres",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(26.dp)
+                        )
+                    }
+                    IconButton(onClick = onAddClick) {
+                        Icon(
+                            Icons.Outlined.AddCircleOutline,
+                            contentDescription = "Ajouter",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
                 }
             }
 
@@ -130,7 +129,30 @@ fun WardrobeScreen(
                 selected = state.selectedCategory,
                 onSelect = { viewModel.loadArticles(it) }
             )
-            Spacer(Modifier.height(16.dp))
+
+            // ── Favoris + couleur chips ────────────────────────────────────
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 20.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(top = 8.dp)
+            ) {
+                item {
+                    StitchChip(
+                        label = "♥ Favoris",
+                        isSelected = state.favorisOnly,
+                        onClick = { viewModel.toggleFavoris() }
+                    )
+                }
+                items(state.availableColors) { color ->
+                    StitchChip(
+                        label = color.replaceFirstChar { it.uppercase() },
+                        isSelected = state.selectedColor == color,
+                        onClick = { viewModel.filterByColor(color) }
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
 
             // ── Content ────────────────────────────────────────────────────
             when {

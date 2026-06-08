@@ -142,7 +142,8 @@ fun AppNavigation() {
             }
             composable(Screen.Wardrobe.route) {
                 WardrobeScreen(
-                    onAddClick = { navController.navigate(Screen.AddArticle.route) }
+                    onAddClick = { navController.navigate(Screen.AddArticle.route) },
+                    onSettingsClick = { navController.navigate(Screen.Settings.route) }
                 )
             }
             composable(Screen.Outfit.route)   { OutfitScreen() }
