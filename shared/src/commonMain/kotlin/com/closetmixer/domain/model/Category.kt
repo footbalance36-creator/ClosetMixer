@@ -68,6 +68,12 @@ enum class Metal(val key: String) {
     OR("or"), ARGENT("argent"), ROSE("rose"), FANTAISIE("fantaisie"), AUCUN("aucun")
 }
 
+enum class Gender(val key: String, val label: String, val emoji: String) {
+    FEMME("femme", "Femme", "♀"),
+    HOMME("homme", "Homme", "♂"),
+    AUTRE("autre", "Autre", "⚧")
+}
+
 enum class AppLanguage(val code: String, val isRTL: Boolean, val nativeName: String) {
     FRENCH("fr", false, "Français"),
     ENGLISH("en", false, "English"),

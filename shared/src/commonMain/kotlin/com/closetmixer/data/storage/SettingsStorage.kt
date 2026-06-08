@@ -5,4 +5,6 @@ interface SettingsStorage {
     fun loadProfilePhoto(): String
     fun saveLanguage(code: String)
     fun loadLanguage(): String
+    fun saveGender(key: String)
+    fun loadGender(): String
 }

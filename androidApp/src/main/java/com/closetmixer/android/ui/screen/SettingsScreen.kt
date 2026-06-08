@@ -60,6 +60,7 @@ import com.closetmixer.android.util.openPlayStorePage
 import com.closetmixer.android.util.requestInAppReview
 import com.closetmixer.domain.model.AppLanguage
 import com.closetmixer.domain.model.CulturalStyle
+import com.closetmixer.domain.model.Gender
 import com.closetmixer.presentation.viewmodel.SettingsViewModel
 import org.koin.compose.koinInject
 
@@ -230,6 +231,60 @@ fun SettingsScreen(viewModel: SettingsViewModel = koinInject()) {
                             onCheckedChange = { viewModel.toggleDarkMode() }
                         )
                     }
+
+                    // Gender picker
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(Icons.Outlined.Person, contentDescription = null,
+                                tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
+                            Text("Genre", style = MaterialTheme.typography.bodyMedium)
+                        }
+                        Spacer(Modifier.height(12.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Gender.entries.forEach { g ->
+                                val isSelected = state.gender == g
+                                Column(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(
+                                            if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
+                                            else MaterialTheme.colorScheme.surface
+                                        )
+                                        .border(
+                                            1.dp,
+                                            if (isSelected) MaterialTheme.colorScheme.primaryContainer
+                                            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                                            RoundedCornerShape(10.dp)
+                                        )
+                                        .clickable { viewModel.setGender(g) }
+                                        .padding(vertical = 10.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(g.emoji, style = MaterialTheme.typography.titleLarge)
+                                    Spacer(Modifier.height(4.dp))
+                                    Text(
+                                        g.label,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
 
                     // Cultural style chips
                     Column(

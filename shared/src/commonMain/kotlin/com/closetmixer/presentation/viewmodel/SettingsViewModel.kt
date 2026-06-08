@@ -3,6 +3,7 @@ package com.closetmixer.presentation.viewmodel
 import com.closetmixer.data.storage.SettingsStorage
 import com.closetmixer.domain.model.AppLanguage
 import com.closetmixer.domain.model.CulturalStyle
+import com.closetmixer.domain.model.Gender
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.update
 data class SettingsUiState(
     val language: AppLanguage = AppLanguage.FRENCH,
     val culturalStyle: CulturalStyle = CulturalStyle.NEUTRAL,
+    val gender: Gender? = null,
     val isDarkMode: Boolean = false,
     val profilePhotoPath: String = ""
 )
@@ -22,7 +24,8 @@ class SettingsViewModel(private val storage: SettingsStorage) {
             profilePhotoPath = storage.loadProfilePhoto(),
             language = AppLanguage.entries
                 .firstOrNull { it.code == storage.loadLanguage() }
-                ?: AppLanguage.FRENCH
+                ?: AppLanguage.FRENCH,
+            gender = Gender.entries.firstOrNull { it.key == storage.loadGender() }
         )
     )
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
@@ -34,6 +37,11 @@ class SettingsViewModel(private val storage: SettingsStorage) {
 
     fun setCulturalStyle(style: CulturalStyle) {
         _uiState.update { it.copy(culturalStyle = style) }
+    }
+
+    fun setGender(gender: Gender) {
+        storage.saveGender(gender.key)
+        _uiState.update { it.copy(gender = gender) }
     }
 
     fun toggleDarkMode() {

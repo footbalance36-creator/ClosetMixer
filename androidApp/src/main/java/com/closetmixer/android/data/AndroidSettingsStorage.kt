@@ -21,8 +21,16 @@ class AndroidSettingsStorage(context: Context) : SettingsStorage {
     override fun loadLanguage(): String =
         prefs.getString(KEY_LANGUAGE, "") ?: ""
 
+    override fun saveGender(key: String) {
+        prefs.edit().putString(KEY_GENDER, key).apply()
+    }
+
+    override fun loadGender(): String =
+        prefs.getString(KEY_GENDER, "") ?: ""
+
     companion object {
         private const val KEY_PROFILE_PHOTO = "profile_photo_path"
         private const val KEY_LANGUAGE = "app_language"
+        private const val KEY_GENDER = "app_gender"
     }
 }
