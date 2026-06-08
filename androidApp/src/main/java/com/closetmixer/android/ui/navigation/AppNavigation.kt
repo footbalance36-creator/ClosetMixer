@@ -11,6 +11,7 @@ import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.FlightTakeoff
 import androidx.compose.material.icons.outlined.GridView
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -57,11 +58,12 @@ sealed class Screen(val route: String, val label: String) {
 private data class NavItem(val screen: Screen, val icon: ImageVector)
 
 private val bottomItems = listOf(
-    NavItem(Screen.Wardrobe, Icons.Outlined.GridView),
-    NavItem(Screen.Outfit,   Icons.Outlined.AutoAwesome),
-    NavItem(Screen.Calendar, Icons.Outlined.CalendarToday),
-    NavItem(Screen.Voyage,   Icons.Outlined.FlightTakeoff),
-    NavItem(Screen.Stats,    Icons.Outlined.Analytics),
+    NavItem(Screen.Wardrobe,  Icons.Outlined.GridView),
+    NavItem(Screen.Outfit,    Icons.Outlined.AutoAwesome),
+    NavItem(Screen.Calendar,  Icons.Outlined.CalendarToday),
+    NavItem(Screen.Voyage,    Icons.Outlined.FlightTakeoff),
+    NavItem(Screen.Stats,     Icons.Outlined.Analytics),
+    NavItem(Screen.Settings,  Icons.Outlined.Settings),
 )
 
 @Composable
