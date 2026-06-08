@@ -17,9 +17,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AddCircleOutline
@@ -29,7 +31,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -43,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.closetmixer.android.ui.component.ArticleCard
 import com.closetmixer.android.ui.component.CategoryChips
+import com.closetmixer.android.ui.component.StitchChip
 import com.closetmixer.android.util.copyImageToInternalStorage
 import com.closetmixer.presentation.viewmodel.SettingsViewModel
 import com.closetmixer.presentation.viewmodel.WardrobeViewModel
@@ -130,7 +132,30 @@ fun WardrobeScreen(
                 selected = state.selectedCategory,
                 onSelect = { viewModel.loadArticles(it) }
             )
-            Spacer(Modifier.height(16.dp))
+
+            // ── Favoris + couleur chips ────────────────────────────────────
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 20.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(top = 8.dp)
+            ) {
+                item {
+                    StitchChip(
+                        label = "♥ Favoris",
+                        isSelected = state.favorisOnly,
+                        onClick = { viewModel.toggleFavoris() }
+                    )
+                }
+                items(state.availableColors) { color ->
+                    StitchChip(
+                        label = color.replaceFirstChar { it.uppercase() },
+                        isSelected = state.selectedColor == color,
+                        onClick = { viewModel.filterByColor(color) }
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
 
             // ── Content ────────────────────────────────────────────────────
             when {

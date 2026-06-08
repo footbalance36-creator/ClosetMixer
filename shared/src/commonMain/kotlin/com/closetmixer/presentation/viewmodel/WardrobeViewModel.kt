@@ -16,6 +16,9 @@ import kotlinx.coroutines.launch
 data class WardrobeUiState(
     val articles: List<Article> = emptyList(),
     val selectedCategory: ArticleCategory? = null,
+    val favorisOnly: Boolean = false,
+    val selectedColor: String? = null,
+    val availableColors: List<String> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null
 )
@@ -28,19 +31,43 @@ class WardrobeViewModel(
     private val _uiState = MutableStateFlow(WardrobeUiState())
     val uiState: StateFlow<WardrobeUiState> = _uiState.asStateFlow()
 
+    private var baseArticles: List<Article> = emptyList()
+
     init { loadArticles() }
 
     fun loadArticles(category: ArticleCategory? = null) {
         scope.launch {
-            _uiState.update { it.copy(isLoading = true, selectedCategory = category) }
+            _uiState.update { it.copy(isLoading = true, selectedCategory = category, selectedColor = null, favorisOnly = false) }
             runCatching {
                 if (category == null) articleRepo.getAllArticles()
                 else articleRepo.getByCategory(category)
-            }.onSuccess { articles ->
-                _uiState.update { it.copy(articles = articles, isLoading = false) }
+            }.onSuccess { all ->
+                baseArticles = all
+                val colors = extractColors(all)
+                _uiState.update { it.copy(articles = all, availableColors = colors, isLoading = false) }
             }.onFailure { e ->
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
+        }
+    }
+
+    fun toggleFavoris() {
+        val newFavoris = !_uiState.value.favorisOnly
+        _uiState.update { state ->
+            state.copy(
+                favorisOnly = newFavoris,
+                articles = applyFilters(baseArticles, newFavoris, state.selectedColor)
+            )
+        }
+    }
+
+    fun filterByColor(color: String?) {
+        val newColor = if (color == _uiState.value.selectedColor) null else color
+        _uiState.update { state ->
+            state.copy(
+                selectedColor = newColor,
+                articles = applyFilters(baseArticles, state.favorisOnly, newColor)
+            )
         }
     }
 
@@ -66,7 +93,7 @@ class WardrobeViewModel(
                     culture = culture
                 )
             }.onSuccess {
-                loadArticles(_uiState.value.selectedCategory)
+                refreshBaseArticles()
                 onDone()
             }.onFailure { e ->
                 _uiState.update { it.copy(error = e.message) }
@@ -75,10 +102,34 @@ class WardrobeViewModel(
     }
 
     fun toggleFavorite(articleId: String) {
-        scope.launch { articleRepo.toggleFavorite(articleId); loadArticles(_uiState.value.selectedCategory) }
+        scope.launch { articleRepo.toggleFavorite(articleId); refreshBaseArticles() }
     }
 
     fun deleteArticle(articleId: String) {
-        scope.launch { articleRepo.delete(articleId); loadArticles(_uiState.value.selectedCategory) }
+        scope.launch { articleRepo.delete(articleId); refreshBaseArticles() }
     }
+
+    private suspend fun refreshBaseArticles() {
+        val category = _uiState.value.selectedCategory
+        runCatching {
+            if (category == null) articleRepo.getAllArticles()
+            else articleRepo.getByCategory(category)
+        }.onSuccess { all ->
+            baseArticles = all
+            val colors = extractColors(all)
+            val filtered = applyFilters(all, _uiState.value.favorisOnly, _uiState.value.selectedColor)
+            _uiState.update { it.copy(articles = filtered, availableColors = colors) }
+        }
+    }
+
+    private fun applyFilters(articles: List<Article>, favorisOnly: Boolean, color: String?): List<Article> =
+        articles
+            .let { if (favorisOnly) it.filter { a -> a.isFavori == 1L } else it }
+            .let { if (color != null) it.filter { a -> a.couleur?.lowercase()?.trim() == color } else it }
+
+    private fun extractColors(articles: List<Article>): List<String> =
+        articles.mapNotNull { it.couleur?.lowercase()?.trim() }
+            .filter { it.isNotEmpty() }
+            .distinct()
+            .sorted()
 }
