@@ -15,7 +15,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -33,20 +32,18 @@ import org.koin.compose.koinInject
 fun StatsScreen(viewModel: StatsViewModel = koinInject()) {
     val state by viewModel.uiState.collectAsState()
 
-    Scaffold { padding ->
-        when {
-            state.isLoading -> Box(
-                Modifier.fillMaxSize().padding(padding),
-                contentAlignment = Alignment.Center
-            ) { CircularProgressIndicator(color = MaterialTheme.colorScheme.primary) }
+    when {
+        state.isLoading -> Box(
+            Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) { CircularProgressIndicator(color = MaterialTheme.colorScheme.primary) }
 
-            state.stats != null -> {
-                val stats = state.stats!!
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                        .padding(horizontal = 20.dp),
+        state.stats != null -> {
+            val stats = state.stats!!
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 20.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     item {
@@ -155,9 +152,9 @@ fun StatsScreen(viewModel: StatsViewModel = koinInject()) {
             }
 
             else -> Box(
-                Modifier.fillMaxSize().padding(padding),
-                contentAlignment = Alignment.Center
-            ) {
+            Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
                 Text(
                     "Impossible de charger les statistiques",
                     color = MaterialTheme.colorScheme.error,
@@ -165,7 +162,6 @@ fun StatsScreen(viewModel: StatsViewModel = koinInject()) {
                 )
             }
         }
-    }
 }
 
 @Composable

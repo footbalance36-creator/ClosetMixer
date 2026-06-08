@@ -67,12 +67,10 @@ fun WardrobeScreen(
         }
     }
 
-    Scaffold { padding ->
-        Column(
-            Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
+    Column(
+        Modifier
+            .fillMaxSize()
+    ) {
             // ── Stitch-style top bar ───────────────────────────────────────
             Row(
                 modifier = Modifier
@@ -127,15 +125,7 @@ fun WardrobeScreen(
                 }
             }
 
-            // ── Section title ──────────────────────────────────────────────
-            Text(
-                text = "Garde-robe",
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
-            )
-
             // ── Category chips ─────────────────────────────────────────────
-            Spacer(Modifier.height(8.dp))
             CategoryChips(
                 selected = state.selectedCategory,
                 onSelect = { viewModel.loadArticles(it) }
@@ -184,5 +174,4 @@ fun WardrobeScreen(
                 }
             }
         }
-    }
 }

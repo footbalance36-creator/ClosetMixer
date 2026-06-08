@@ -375,7 +375,7 @@
   <h1>Closet<span>Mixer</span></h1>
   <div class="cover-sub">Application mobile de gestion de garde-robe intelligente</div>
   <div class="cover-meta">
-    <div><strong>Version</strong>1.1 — Cm-mob_003</div>
+    <div><strong>Version</strong>1.2 — Cm-mob_005</div>
     <div><strong>Date</strong>Juin 2026</div>
     <div><strong>Statut</strong>En cours de développement</div>
     <div><strong>Plateforme</strong>Android (iOS à venir)</div>
@@ -615,9 +615,9 @@
         </tr>
         <tr>
           <td>F-07</td>
-          <td>Planifier une tenue sur un jour du calendrier</td>
+          <td>Planifier un article sur un jour du calendrier avec navigation mensuelle</td>
           <td><span class="badge badge-must">MUST</span></td>
-          <td><span class="badge badge-v1">V1</span></td>
+          <td><span class="badge badge-v1">V1 ✓</span></td>
         </tr>
         <tr>
           <td>F-08</td>
@@ -752,12 +752,19 @@
     </ul>
 
     <h3>E-04 — Calendrier</h3>
-    <p>Vue mensuelle permettant de visualiser et planifier les tenues jour par jour.</p>
+    <p>Vue mensuelle permettant de visualiser et planifier les articles jour par jour.</p>
     <ul>
-      <li><strong>En-tête :</strong> titre "Calendrier" + nom du mois en cours</li>
-      <li><strong>Grille 7 colonnes :</strong> Dim–Lun–Mar–Mer–Jeu–Ven–Sam, décalage automatique du 1er du mois</li>
-      <li><strong>Indicateurs :</strong> point doré sous les jours avec une tenue planifiée, fond or pâle sur le jour sélectionné, couleur primaire pour aujourd'hui</li>
-      <li><strong>Résumé mensuel :</strong> carte affichant le nombre de tenues planifiées ce mois</li>
+      <li><strong>En-tête :</strong> titre "Calendrier" + navigation mensuelle avec flèches &lt; &gt; (mois précédent / suivant)</li>
+      <li><strong>Grille 7 colonnes :</strong> Dim–Lun–Mar–Mer–Jeu–Ven–Sam, décalage automatique du 1er du mois, reconstruit à chaque changement de mois</li>
+      <li><strong>Indicateurs :</strong> point doré sous les jours avec un article planifié, fond or pâle sur le jour sélectionné, couleur primaire pour aujourd'hui</li>
+      <li><strong>Panel jour sélectionné :</strong> s'affiche sous la grille au tap sur un jour
+        <ul>
+          <li>Si un article est planifié : icône ✓ + libellé "Tenue planifiée" + bouton "Modifier"</li>
+          <li>Si aucun article : bouton "Planifier une tenue" pleine largeur</li>
+        </ul>
+      </li>
+      <li><strong>Sélecteur d'article (ModalBottomSheet) :</strong> liste les articles de la garde-robe avec sous-catégorie, catégorie et couleur — tap sur un article l'affecte au jour sélectionné</li>
+      <li><strong>Résumé mensuel :</strong> carte affichant le nombre de jours planifiés ce mois</li>
     </ul>
 
     <h3>E-05 — Voyages</h3>
@@ -1051,14 +1058,23 @@
         </ul>
       </li>
       <li>
-        <span class="phase">Cm-mob_004 — Publication</span>
-        <span class="duration">À planifier</span>
+        <span class="phase">Cm-mob_004 — CI/CD & Publication</span>
+        <span class="duration">✓ Livré — Juin 2026</span>
         <ul class="items">
-          <li>Tests unitaires et tests UI (Compose Test)</li>
-          <li>Support RTL complet pour l'arabe</li>
-          <li>Publication sur Google Play (closed beta)</li>
-          <li>Analyse de performance et correction de régressions</li>
-          <li>Début du portage iOS (KMP)</li>
+          <li>Intégration Fastlane pour l'automatisation des builds et déploiements</li>
+          <li>GitHub Actions : pipeline de déploiement automatique sur le Google Play Store</li>
+          <li>Keystore signé configuré pour la production</li>
+        </ul>
+      </li>
+      <li>
+        <span class="phase">Cm-mob_005 — Corrections et calendrier complet</span>
+        <span class="duration">✓ Livré — Juin 2026</span>
+        <ul class="items">
+          <li>Suppression des espaces blancs top/bottom sur tous les écrans (Scaffold imbriqué retiré)</li>
+          <li>Calendrier : navigation entre les mois (flèches &lt; &gt;)</li>
+          <li>Calendrier : panel jour sélectionné + sélecteur d'article (ModalBottomSheet)</li>
+          <li>Suppression du DataSeeder — l'app démarre avec une base vide, sans données fictives</li>
+          <li>Correction des statistiques : les catégories reflètent uniquement les articles réels de l'utilisateur</li>
         </ul>
       </li>
     </ul>
@@ -1068,7 +1084,7 @@
       <thead><tr><th>Livrable</th><th>Format</th><th>Jalon</th></tr></thead>
       <tbody>
         <tr><td>APK de démonstration signé</td><td>.apk / .aab</td><td>Cm-mob_002</td></tr>
-        <tr><td>Cahier des charges MOA (ce document)</td><td>HTML</td><td>Cm-mob_002 → mis à jour Cm-mob_003</td></tr>
+        <tr><td>Cahier des charges MOA (ce document)</td><td>HTML</td><td>Cm-mob_002 → mis à jour Cm-mob_005</td></tr>
         <tr><td>Spécification technique MOE</td><td>À créer</td><td>Cm-mob_003</td></tr>
         <tr><td>Code source versionné</td><td>GitHub — feature branches</td><td>Continu</td></tr>
         <tr><td>Rapport de tests</td><td>À définir</td><td>Cm-mob_004</td></tr>
@@ -1103,7 +1119,7 @@
   </section>
 
   <footer>
-    <span>ClosetMixer — Cahier des charges MOA v1.1 — Cm-mob_003</span>
+    <span>ClosetMixer — Cahier des charges MOA v1.2 — Cm-mob_005</span>
     <span>Juin 2026 — Confidentiel</span>
   </footer>
 

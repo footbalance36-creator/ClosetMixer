@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClosetMixer — Spec technique v005</title>
+  <style>
+    :root {
+      --gold:       #735C00;
+      --gold-light: #D4AF37;
+      --gold-pale:  #FFF8E7;
+      --bg:         #FAF9F7;
+      --surface:    #FFFFFF;
+      --border:     #E3E2E0;
+      --text:       #1A1C1B;
+      --muted:      #4D4635;
+      --accent:     #554300;
+      --red:        #BA1A1A;
+      --red-light:  #FFEDED;
+      --blue:       #415BA4;
+      --blue-light: #EEF1FF;
+      --green:      #2E7D32;
+      --green-light:#E8F5E9;
+      --orange:     #E65100;
+      --orange-light:#FFF3E0;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    /* ── Cover ── */
+    .cover {
+      background: linear-gradient(135deg, #1A1C1B 60%, #2e2700 100%);
+      color: #fff;
+      padding: 72px 64px 56px;
+      position: relative;
+      overflow: hidden;
+    }
+    .cover::after {
+      content: "";
+      position: absolute;
+      right: -60px; top: -60px;
+      width: 340px; height: 340px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #D4AF3730 0%, transparent 70%);
+    }
+    .cover-tag {
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+    .cover h1 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 48px;
+      font-weight: 700;
+      letter-spacing: -1px;
+      line-height: 1.1;
+      color: #fff;
+    }
+    .cover h1 span { color: var(--gold-light); }
+    .cover-sub {
+      font-size: 18px;
+      color: #ccc;
+      margin-top: 12px;
+      font-weight: 300;
+    }
+    .cover-meta {
+      margin-top: 48px;
+      display: flex;
+      gap: 48px;
+      font-size: 13px;
+      color: #aaa;
+    }
+    .cover-meta strong { color: #fff; display: block; font-size: 14px; }
+
+    /* ── Layout ── */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 32px 80px;
+    }
+
+    /* ── Table of contents ── */
+    .toc {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--gold);
+      border-radius: 8px;
+      padding: 28px 32px;
+      margin: 40px 0;
+    }
+    .toc h2 {
+      font-size: 13px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+      border: none;
+      padding: 0;
+    }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin: 6px 0; }
+    .toc a { color: var(--gold); text-decoration: none; font-weight: 500; }
+    .toc a:hover { text-decoration: underline; }
+
+    /* ── Sections ── */
+    section { margin-top: 56px; }
+
+    .section-number {
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    h2 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 10px;
+      margin-bottom: 24px;
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent);
+      margin: 28px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    h3::before {
+      content: "";
+      width: 4px; height: 18px;
+      background: var(--gold-light);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    p { margin-bottom: 14px; color: var(--text); }
+    ul, ol { padding-left: 22px; margin-bottom: 14px; }
+    li { margin: 5px 0; }
+
+    /* ── Tables ── */
+    .feat-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+    .feat-table thead tr { background: var(--gold-pale); }
+    .feat-table th {
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      border-bottom: 2px solid var(--gold-light);
+    }
+    .feat-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .feat-table tr:last-child td { border-bottom: none; }
+    .feat-table tr:hover td { background: #FAFAF8; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+    .card p { margin: 0; font-size: 14px; color: var(--muted); }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    /* ── Screen cards ── */
+    .screen-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .screen-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 16px;
+    }
+    .screen-card .icon { font-size: 24px; margin-bottom: 8px; }
+    .screen-card .name { font-weight: 700; font-size: 14px; color: var(--text); margin-bottom: 4px; }
+    .screen-card .desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+    .badge-ok      { background: var(--green-light); color: var(--green); }
+    .badge-warn    { background: var(--orange-light); color: var(--orange); }
+    .badge-missing { background: var(--red-light);   color: var(--red); }
+    .badge-info    { background: var(--blue-light);  color: var(--blue); }
+
+    /* ── Callouts ── */
+    .callout {
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .callout-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+    .callout-body { font-size: 14px; line-height: 1.6; }
+    .callout-body strong { display: block; font-size: 14px; margin-bottom: 3px; }
+    .callout-warning { background: #FFF8E7; border-left: 4px solid var(--gold); }
+    .callout-danger  { background: var(--red-light); border-left: 4px solid var(--red); }
+    .callout-success { background: var(--green-light); border-left: 4px solid var(--green); }
+    .callout-info    { background: var(--blue-light); border-left: 4px solid var(--blue); }
+
+    /* ── Code block ── */
+    pre {
+      background: #1A1C1B;
+      color: #D4AF37;
+      border-radius: 10px;
+      padding: 20px 24px;
+      font-size: 13px;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin-bottom: 20px;
+      font-family: "SF Mono", "Fira Code", monospace;
+    }
+    code {
+      background: #F0ECE0;
+      color: var(--accent);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: "SF Mono", "Fira Code", monospace;
+    }
+    pre code { background: none; color: inherit; padding: 0; }
+
+    /* ── File tree ── */
+    .tree {
+      background: #1A1C1B;
+      color: #ccc;
+      border-radius: 10px;
+      padding: 20px 24px;
+      font-size: 13px;
+      line-height: 1.8;
+      overflow-x: auto;
+      margin-bottom: 20px;
+      font-family: "SF Mono", "Fira Code", monospace;
+    }
+    .tree .dir  { color: var(--gold-light); font-weight: 600; }
+    .tree .file { color: #aaa; }
+    .tree .note { color: #666; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════ COVER -->
+<div class="cover">
+  <div class="cover-tag">Closet Mixer · Spec Technique</div>
+  <h1>État réel du code<br><span>v005</span></h1>
+  <div class="cover-sub">Référence technique — ce qui est effectivement implémenté</div>
+  <div class="cover-meta">
+    <div><strong>Branche</strong>feature/Cm-mob_005</div>
+    <div><strong>Date</strong>07 juin 2026</div>
+    <div><strong>Plateforme</strong>Android (KMP)</div>
+    <div><strong>Statut</strong>En développement</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- TABLE DES MATIÈRES -->
+  <div class="toc">
+    <h2>Table des matières</h2>
+    <ol>
+      <li><a href="#stack">Stack technique réelle</a></li>
+      <li><a href="#structure">Structure des fichiers</a></li>
+      <li><a href="#navigation">Navigation</a></li>
+      <li><a href="#design">Design system — Stitch</a></li>
+      <li><a href="#di">Injection de dépendances (Koin)</a></li>
+      <li><a href="#viewmodels">ViewModels — pattern</a></li>
+      <li><a href="#ecrans">Écrans — état fonctionnel</a></li>
+      <li><a href="#bdd">Base de données SQLDelight</a></li>
+      <li><a href="#meteo">API Météo — Open-Meteo</a></li>
+      <li><a href="#donnees">Données de démonstration</a></li>
+      <li><a href="#cicd">CI / CD</a></li>
+      <li><a href="#todo">Points à améliorer</a></li>
+    </ol>
+  </div>
+
+  <!-- ═══ 1. STACK -->
+  <section id="stack">
+    <div class="section-number">01</div>
+    <h2>Stack technique réelle</h2>
+
+    <table class="feat-table">
+      <thead>
+        <tr><th>Composant</th><th>Librairie</th><th>Remarque</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Langage partagé</td><td>Kotlin Multiplatform</td><td>module <code>shared</code></td></tr>
+        <tr><td>UI Android</td><td>Jetpack Compose + Material 3</td><td>Stitch design system</td></tr>
+        <tr><td>Base de données</td><td>SQLDelight 2.x</td><td><code>ClosetDatabase.sq</code></td></tr>
+        <tr><td>Réseau</td><td>Ktor Client</td><td>Open-Meteo (gratuit, sans clé API)</td></tr>
+        <tr><td>DI</td><td>Koin 3.x KMP</td><td><code>sharedModule</code> + <code>androidModule</code></td></tr>
+        <tr><td>Réactivité</td><td>Coroutines + StateFlow</td><td>Pas d'AndroidX ViewModel</td></tr>
+        <tr><td>Datetime</td><td>kotlinx-datetime</td><td>Utilisé dans CalendarViewModel</td></tr>
+        <tr><td>Navigation</td><td>Compose Navigation</td><td>8 routes</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-warning">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <strong>Non implémenté par rapport au spec initial</strong>
+        moko-resources, Coil, OpenWeatherMap, AndroidX ViewModel, DataSeeder.
+        Ces éléments étaient prévus mais ne sont pas dans le code.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 2. STRUCTURE -->
+  <section id="structure">
+    <div class="section-number">02</div>
+    <h2>Structure des fichiers</h2>
+
+    <div class="tree">
+<span class="dir">ClosetMixer/</span>
+├── <span class="dir">shared/src/commonMain/kotlin/com/closetmixer/</span>
+│   ├── <span class="dir">data/</span>
+│   │   ├── <span class="dir">db/</span>         <span class="note">DatabaseDriverFactory.kt</span>
+│   │   ├── <span class="dir">model/</span>      <span class="note">Article · CalendarEntry · Tenue · Voyage</span>
+│   │   ├── <span class="dir">remote/</span>     <span class="note">WeatherApi · WeatherDto  ← Open-Meteo</span>
+│   │   ├── <span class="dir">repository/</span> <span class="note">ArticleRepository · TenueRepository · WeatherRepository</span>
+│   │   └── <span class="dir">storage/</span>    <span class="note">SettingsStorage.kt</span>
+│   ├── <span class="dir">di/</span>             <span class="note">SharedModule.kt</span>
+│   ├── <span class="dir">domain/</span>
+│   │   ├── <span class="dir">model/</span>      <span class="note">Category.kt</span>
+│   │   └── <span class="dir">usecase/</span>    <span class="note">AddArticle · GenerateOutfit · GetArticlesByCategory</span>
+│   │                       <span class="note">GetStats · GetWeather · PlanOutfit</span>
+│   └── <span class="dir">presentation/viewmodel/</span>
+│       <span class="note">CalendarViewModel · OutfitViewModel · SettingsViewModel</span>
+│       <span class="note">StatsViewModel · VoyageViewModel · WardrobeViewModel</span>
+│
+├── <span class="dir">androidApp/src/main/java/com/closetmixer/android/</span>
+│   ├── <span class="file">ClosetMixerApp.kt</span>       <span class="note">Application — Koin init uniquement</span>
+│   ├── <span class="file">MainActivity.kt</span>
+│   ├── <span class="dir">data/</span>       <span class="note">AndroidSettingsStorage.kt</span>
+│   ├── <span class="dir">di/</span>         <span class="note">AndroidModule.kt</span>
+│   ├── <span class="dir">ui/component/</span>
+│   │   <span class="note">ArticleCard · BottomNavBar · CategoryChips · OutfitRow · WeatherBanner</span>
+│   ├── <span class="dir">ui/navigation/</span>  <span class="note">AppNavigation.kt</span>
+│   ├── <span class="dir">ui/screen/</span>
+│   │   <span class="note">AddArticle · Calendar · Onboarding · Outfit · Settings · Stats · Voyage · Wardrobe</span>
+│   ├── <span class="dir">ui/theme/</span>   <span class="note">Color · Theme · Type</span>
+│   └── <span class="dir">util/</span>       <span class="note">ImageUtils.kt</span>
+│
+└── <span class="dir">spec/</span>
+    ├── <span class="file">Cm-mob_001.md</span>   <span class="note">Prompt initial de création</span>
+    ├── <span class="file">Cm-mob_002.md</span>   <span class="note">Prompt Stitch UI</span>
+    └── <span class="file">Cm-mob_005.html</span> <span class="note">← ce document</span>
+    </div>
+  </section>
+
+  <!-- ═══ 3. NAVIGATION -->
+  <section id="navigation">
+    <div class="section-number">03</div>
+    <h2>Navigation</h2>
+
+    <p>8 routes déclarées dans <code>AppNavigation.kt</code>. La barre inférieure affiche 5 onglets.</p>
+
+    <table class="feat-table">
+      <thead>
+        <tr><th>Route</th><th>Écran</th><th>Onglet nav</th><th>Condition d'accès</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>onboarding</code></td><td>OnboardingScreen</td><td>—</td><td>Premier lancement uniquement</td></tr>
+        <tr><td><code>wardrobe</code></td><td>WardrobeScreen</td><td>Garde-robe</td><td>Démarrage par défaut</td></tr>
+        <tr><td><code>outfit</code></td><td>OutfitScreen</td><td>Tenues</td><td></td></tr>
+        <tr><td><code>calendar</code></td><td>CalendarScreen</td><td>Calendrier</td><td></td></tr>
+        <tr><td><code>voyage</code></td><td>VoyageScreen</td><td>Voyage</td><td></td></tr>
+        <tr><td><code>stats</code></td><td>StatsScreen</td><td>Stats</td><td></td></tr>
+        <tr><td><code>settings</code></td><td>SettingsScreen</td><td>—</td><td>Accessible depuis Paramètres</td></tr>
+        <tr><td><code>add_article</code></td><td>AddArticleScreen</td><td>—</td><td>Bouton + de la garde-robe</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">ℹ️</div>
+      <div class="callout-body">
+        <strong>NavigationBar</strong>
+        <code>WindowInsets(0)</code> + <code>navigationBarsPadding()</code> pour hauteur compacte sans masquer la barre système. Aucun <code>Scaffold</code> imbriqué dans les écrans — tous utilisent <code>Column(Modifier.fillMaxSize())</code> directement.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 4. DESIGN -->
+  <section id="design">
+    <div class="section-number">04</div>
+    <h2>Design system — Stitch</h2>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">Style</div>
+        <p>Luxe minimaliste. Surfaces sombres, accents dorés, typographie élégante.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Couleur principale</div>
+        <p>Champagne Gold <code>#C9A84C</code> — <code>MaterialTheme.colorScheme.primary</code></p>
+      </div>
+      <div class="card">
+        <div class="card-title">Typographie</div>
+        <p>Playfair Display (titres) + Inter (corps de texte)</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Règle layout</div>
+        <p>Aucun <code>Scaffold</code> imbriqué. Pas de double padding status bar.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 5. DI -->
+  <section id="di">
+    <div class="section-number">05</div>
+    <h2>Injection de dépendances — Koin</h2>
+
+    <h3>androidModule</h3>
+    <table class="feat-table">
+      <thead><tr><th>Type</th><th>Implémentation</th></tr></thead>
+      <tbody>
+        <tr><td><code>SqlDriver</code></td><td><code>DatabaseDriverFactory(androidContext()).createDriver()</code></td></tr>
+        <tr><td><code>SettingsStorage</code></td><td><code>AndroidSettingsStorage(androidContext())</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>sharedModule</h3>
+    <table class="feat-table">
+      <thead><tr><th>Scope</th><th>Binding</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge badge-info">single</span></td><td><code>HttpClient, ClosetDatabase, WeatherApi</code></td></tr>
+        <tr><td><span class="badge badge-info">single</span></td><td><code>ArticleRepository, TenueRepository, WeatherRepository</code></td></tr>
+        <tr><td><span class="badge badge-ok">factory</span></td><td><code>AddArticleUseCase, GetArticlesByCategoryUseCase, GenerateOutfitUseCase</code></td></tr>
+        <tr><td><span class="badge badge-ok">factory</span></td><td><code>GetWeatherUseCase, PlanOutfitUseCase, GetStatsUseCase</code></td></tr>
+        <tr><td><span class="badge badge-info">single</span></td><td><code>WardrobeViewModel(get(), get())</code></td></tr>
+        <tr><td><span class="badge badge-info">single</span></td><td><code>OutfitViewModel(get(), get())</code></td></tr>
+        <tr><td><span class="badge badge-info">single</span></td><td><code>CalendarViewModel(get(), get(), get())</code> — PlanOutfit · GetWeather · GetArticlesByCategory</td></tr>
+        <tr><td><span class="badge badge-info">single</span></td><td><code>VoyageViewModel(get()), StatsViewModel(get()), SettingsViewModel(get())</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ═══ 6. VIEWMODELS -->
+  <section id="viewmodels">
+    <div class="section-number">06</div>
+    <h2>ViewModels — pattern réel</h2>
+
+    <p>Pas d'AndroidX ViewModel. Chaque ViewModel gère son propre scope de coroutine :</p>
+
+    <pre><code>class XxxViewModel(...) {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private val _uiState = MutableStateFlow(XxxUiState())
+    val uiState: StateFlow&lt;XxxUiState&gt; = _uiState.asStateFlow()
+}</code></pre>
+
+    <p>Les ViewModels sont enregistrés en <code>single</code> dans Koin — une seule instance par ViewModel pour toute la session.</p>
+  </section>
+
+  <!-- ═══ 7. ÉCRANS -->
+  <section id="ecrans">
+    <div class="section-number">07</div>
+    <h2>Écrans — état fonctionnel</h2>
+
+    <div class="screen-grid">
+      <div class="screen-card">
+        <div class="icon">👗</div>
+        <div class="name">Garde-robe</div>
+        <div class="desc">Grille articles, filtres catégorie, ajout photo, swipe-to-delete, favoris</div>
+      </div>
+      <div class="screen-card">
+        <div class="icon">✨</div>
+        <div class="name">Tenues</div>
+        <div class="desc">Génération aléatoire avec météo. Tenues non sauvegardées en base.</div>
+      </div>
+      <div class="screen-card">
+        <div class="icon">📅</div>
+        <div class="name">Calendrier</div>
+        <div class="desc">Navigation mois, planification article par jour, ModalBottomSheet</div>
+      </div>
+      <div class="screen-card">
+        <div class="icon">✈️</div>
+        <div class="name">Voyage</div>
+        <div class="desc">Création voyage, valise virtuelle, ajout articles</div>
+      </div>
+      <div class="screen-card">
+        <div class="icon">📊</div>
+        <div class="name">Stats</div>
+        <div class="desc">Répartition par catégorie, total articles, jamais portés</div>
+      </div>
+      <div class="screen-card">
+        <div class="icon">⚙️</div>
+        <div class="name">Paramètres</div>
+        <div class="desc">Photo profil, langue, style culturel</div>
+      </div>
+      <div class="screen-card">
+        <div class="icon">🎬</div>
+        <div class="name">Onboarding</div>
+        <div class="desc">Affiché une seule fois au premier lancement</div>
+      </div>
+      <div class="screen-card">
+        <div class="icon">➕</div>
+        <div class="name">Ajout article</div>
+        <div class="desc">Formulaire avec listes, catégorie, couleur, métal, culture, photo</div>
+      </div>
+    </div>
+
+    <h3>CalendarScreen — détail</h3>
+    <table class="feat-table">
+      <thead><tr><th>Fonctionnalité</th><th>Implémentation</th></tr></thead>
+      <tbody>
+        <tr><td>Navigation mensuelle</td><td>Flèches <code>&lt;</code> <code>&gt;</code> → <code>viewModel.prevMonth()</code> / <code>nextMonth()</code></td></tr>
+        <tr><td>Grille jours</td><td><code>LazyVerticalGrid</code> 7 colonnes, réactif au mois courant</td></tr>
+        <tr><td>Indicateur planifié</td><td>Point doré sous le numéro du jour</td></tr>
+        <tr><td>Panel jour sélectionné</td><td>Affiché sous la grille au tap — tenue planifiée ou bouton Planifier</td></tr>
+        <tr><td>Picker article</td><td><code>ModalBottomSheet</code> listant les articles de la garde-robe</td></tr>
+        <tr><td>Stockage</td><td><code>CalendarEntry.tenueId</code> contient un <code>articleId</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ═══ 8. BDD -->
+  <section id="bdd">
+    <div class="section-number">08</div>
+    <h2>Base de données SQLDelight</h2>
+
+    <p>Fichier : <code>shared/src/commonMain/sqldelight/com/closetmixer/db/ClosetDatabase.sq</code></p>
+
+    <table class="feat-table">
+      <thead><tr><th>Table</th><th>Rôle</th><th>Statut</th></tr></thead>
+      <tbody>
+        <tr><td><code>Article</code></td><td>Vêtements, chaussures, bijoux, accessoires</td><td><span class="badge badge-ok">Actif</span></td></tr>
+        <tr><td><code>Tenue</code></td><td>Tenues composées</td><td><span class="badge badge-warn">Non alimenté</span></td></tr>
+        <tr><td><code>TenueArticle</code></td><td>Relation Tenue ↔ Article</td><td><span class="badge badge-warn">Non alimenté</span></td></tr>
+        <tr><td><code>CalendarEntry</code></td><td>Planification jour → articleId</td><td><span class="badge badge-ok">Actif</span></td></tr>
+        <tr><td><code>Voyage</code></td><td>Voyages créés</td><td><span class="badge badge-ok">Actif</span></td></tr>
+        <tr><td><code>VoyageArticle</code></td><td>Relation Voyage ↔ Article</td><td><span class="badge badge-ok">Actif</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ═══ 9. MÉTÉO -->
+  <section id="meteo">
+    <div class="section-number">09</div>
+    <h2>API Météo — Open-Meteo</h2>
+
+    <div class="callout callout-success">
+      <div class="callout-icon">✅</div>
+      <div class="callout-body">
+        <strong>Sans clé API — entièrement gratuit</strong>
+        Contrairement au spec initial qui prévoyait OpenWeatherMap, l'appli utilise Open-Meteo.
+      </div>
+    </div>
+
+    <pre><code>GET https://api.open-meteo.com/v1/forecast
+  ?latitude=...&longitude=...
+  &current=temperature_2m,weathercode,relative_humidity_2m
+  &timezone=auto</code></pre>
+
+    <p>Réponse mappée dans <code>WeatherDto</code> / <code>CurrentWeatherDto</code>. Codes météo traduits en français et en emoji dans <code>WeatherDto.kt</code>.</p>
+  </section>
+
+  <!-- ═══ 10. DONNÉES -->
+  <section id="donnees">
+    <div class="section-number">10</div>
+    <h2>Données de démonstration</h2>
+
+    <div class="callout callout-success">
+      <div class="callout-icon">✅</div>
+      <div class="callout-body">
+        <strong>DataSeeder supprimé</strong>
+        <code>DataSeeder.kt</code> et son appel dans <code>ClosetMixerApp</code> ont été supprimés. L'appli démarre avec une base vide. Tout ce qui s'affiche vient uniquement de ce que l'utilisateur ajoute lui-même.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 11. CI/CD -->
+  <section id="cicd">
+    <div class="section-number">11</div>
+    <h2>CI / CD</h2>
+
+    <table class="feat-table">
+      <thead><tr><th>Élément</th><th>Détail</th></tr></thead>
+      <tbody>
+        <tr><td>Fastlane</td><td>Configuré (branch <code>feature/Cm-mob_004</code>)</td></tr>
+        <tr><td>GitHub Actions</td><td>Déploiement automatique Play Store</td></tr>
+        <tr><td>Keystore</td><td><code>spec/closetmixer.jks</code></td></tr>
+        <tr><td>Service account</td><td><code>spec/footbalance-fe5df-b58fce7dda8f.json</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ═══ 12. TODO -->
+  <section id="todo">
+    <div class="section-number">12</div>
+    <h2>Points à améliorer — connus</h2>
+
+    <table class="feat-table">
+      <thead><tr><th>#</th><th>Problème</th><th>Impact</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><code>OutfitScreen</code> ne sauvegarde pas les tenues générées en base</td>
+          <td><code>StatsScreen.totalTenues</code> reste toujours à 0. Le calendrier ne peut pas référencer de vraies tenues.</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><code>CalendarEntry.tenueId</code> stocke un <code>articleId</code></td>
+          <td>Détournement de champ. Fonctionnel mais sémantique incorrecte — à corriger quand les tenues seront sauvegardées.</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Pas de vue détail / édition d'un article existant</td>
+          <td>L'utilisateur ne peut pas modifier un article après l'avoir ajouté, seulement le supprimer.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+</div>
+</body>
+</html>

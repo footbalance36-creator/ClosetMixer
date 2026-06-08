@@ -41,9 +41,6 @@ fun BottomNavBar(
                         contentDescription = screen.label
                     )
                 },
-                label = {
-                    Text(screen.label, style = MaterialTheme.typography.labelSmall)
-                },
                 selected = isSelected,
                 onClick = { onNavigate(screen.route) },
                 colors = NavigationBarItemDefaults.colors(
