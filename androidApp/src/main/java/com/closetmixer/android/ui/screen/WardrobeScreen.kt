@@ -1,8 +1,5 @@
 package com.closetmixer.android.ui.screen
 
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -39,13 +36,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.closetmixer.android.ui.component.ArticleCard
 import com.closetmixer.android.ui.component.CategoryChips
 import com.closetmixer.android.ui.component.StitchChip
-import com.closetmixer.android.util.copyImageToInternalStorage
 import com.closetmixer.presentation.viewmodel.SettingsViewModel
 import com.closetmixer.presentation.viewmodel.WardrobeViewModel
 import org.koin.compose.koinInject
@@ -53,21 +48,12 @@ import org.koin.compose.koinInject
 @Composable
 fun WardrobeScreen(
     onAddClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {},
     viewModel: WardrobeViewModel = koinInject(),
     settingsViewModel: SettingsViewModel = koinInject()
 ) {
     val state by viewModel.uiState.collectAsState()
     val settings by settingsViewModel.uiState.collectAsState()
-    val context = LocalContext.current
-
-    val imagePicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let {
-            val path = copyImageToInternalStorage(context, it)
-            settingsViewModel.setProfilePhoto(path)
-        }
-    }
 
     Column(
         Modifier
@@ -92,7 +78,7 @@ fun WardrobeScreen(
                             .clip(CircleShape)
                             .border(1.5.dp, MaterialTheme.colorScheme.primaryContainer, CircleShape)
                             .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .clickable { imagePicker.launch("image/*") },
+                            .clickable { onSettingsClick() },
                         contentAlignment = Alignment.Center
                     ) {
                         if (settings.profilePhotoPath.isNotEmpty()) {
