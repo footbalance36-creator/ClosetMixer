@@ -32,10 +32,10 @@ CREATE TABLE TenueArticle (
 
 CREATE TABLE CalendarEntry (
     date TEXT PRIMARY KEY NOT NULL,
-    tenueId TEXT NOT NULL,
+    tenueId TEXT,
     meteo TEXT,
     temperature REAL,
-    FOREIGN KEY (tenueId) REFERENCES Tenue(id) ON DELETE CASCADE
+    FOREIGN KEY (tenueId) REFERENCES Tenue(id) ON DELETE SET NULL
 );
 
 CREATE TABLE Voyage (
@@ -144,6 +144,13 @@ SELECT * FROM CalendarEntry WHERE date LIKE ? ORDER BY date;
 insertCalendarEntry:
 INSERT OR REPLACE INTO CalendarEntry(date, tenueId, meteo, temperature)
 VALUES (?, ?, ?, ?);
+
+setTenueForDate:
+INSERT OR REPLACE INTO CalendarEntry(date, tenueId, meteo, temperature)
+VALUES (?, ?, NULL, NULL);
+
+clearDate:
+DELETE FROM CalendarEntry WHERE date = ?;
 
 -- Queries Stats
 countArticlesByCategory:

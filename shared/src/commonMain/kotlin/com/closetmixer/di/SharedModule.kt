@@ -3,6 +3,7 @@ package com.closetmixer.di
 import app.cash.sqldelight.db.SqlDriver
 import com.closetmixer.data.remote.WeatherApi
 import com.closetmixer.data.repository.ArticleRepository
+import com.closetmixer.data.repository.CalendarRepository
 import com.closetmixer.data.repository.TenueRepository
 import com.closetmixer.data.repository.WeatherRepository
 import com.closetmixer.db.ClosetDatabase
@@ -43,6 +44,7 @@ val sharedModule = module {
     single { ArticleRepository(get()) }
     single { TenueRepository(get()) }
     single { WeatherRepository(get()) }
+    single { CalendarRepository(get()) }
 
     factory { AddArticleUseCase(get()) }
     factory { GetArticlesByCategoryUseCase(get()) }
