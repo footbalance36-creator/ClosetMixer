@@ -18,11 +18,17 @@ data class SettingsUiState(
 class SettingsViewModel(private val storage: SettingsStorage) {
 
     private val _uiState = MutableStateFlow(
-        SettingsUiState(profilePhotoPath = storage.loadProfilePhoto())
+        SettingsUiState(
+            profilePhotoPath = storage.loadProfilePhoto(),
+            language = AppLanguage.entries
+                .firstOrNull { it.code == storage.loadLanguage() }
+                ?: AppLanguage.FRENCH
+        )
     )
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
     fun setLanguage(language: AppLanguage) {
+        storage.saveLanguage(language.code)
         _uiState.update { it.copy(language = language) }
     }
 

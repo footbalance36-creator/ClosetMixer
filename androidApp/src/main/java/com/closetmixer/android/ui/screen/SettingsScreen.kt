@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Language
@@ -33,6 +34,7 @@ import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.Style
+import androidx.core.os.LocaleListCompat
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -303,7 +305,12 @@ fun SettingsScreen(viewModel: SettingsViewModel = koinInject()) {
                                                 else Color.Transparent,
                                                 RoundedCornerShape(10.dp)
                                             )
-                                            .clickable { viewModel.setLanguage(lang.lang) }
+                                            .clickable {
+                                            viewModel.setLanguage(lang.lang)
+                                            AppCompatDelegate.setApplicationLocales(
+                                                LocaleListCompat.forLanguageTags(lang.lang.code)
+                                            )
+                                        }
                                             .padding(vertical = 8.dp),
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
