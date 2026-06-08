@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AddCircleOutline
 import androidx.compose.material.icons.outlined.Checkroom
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -103,13 +104,23 @@ fun WardrobeScreen(
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
-                IconButton(onClick = onAddClick) {
-                    Icon(
-                        Icons.Outlined.AddCircleOutline,
-                        contentDescription = "Ajouter",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(32.dp)
-                    )
+                Row {
+                    IconButton(onClick = onSettingsClick) {
+                        Icon(
+                            Icons.Outlined.Settings,
+                            contentDescription = "Paramètres",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(26.dp)
+                        )
+                    }
+                    IconButton(onClick = onAddClick) {
+                        Icon(
+                            Icons.Outlined.AddCircleOutline,
+                            contentDescription = "Ajouter",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
                 }
             }
 
