@@ -61,3 +61,6 @@ androidApp/release/
 # Sensitive files
 spec/*.json
 spec/keystore_base64.txt
+
+# Spec / MOA documents
+spec/

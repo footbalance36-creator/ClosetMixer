@@ -54,6 +54,10 @@ class ArticleRepository(private val db: ClosetDatabase) {
         queries.incrementUsage(id)
     }
 
+    suspend fun searchArticles(query: String): List<Article> = withContext(Dispatchers.Default) {
+        queries.searchArticles(query).executeAsList().map { it.toModel() }
+    }
+
     suspend fun delete(id: String) = withContext(Dispatchers.Default) {
         queries.deleteArticle(id)
     }

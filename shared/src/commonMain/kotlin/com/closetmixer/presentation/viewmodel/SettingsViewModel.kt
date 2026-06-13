@@ -14,7 +14,11 @@ data class SettingsUiState(
     val culturalStyle: CulturalStyle = CulturalStyle.NEUTRAL,
     val gender: Gender? = null,
     val isDarkMode: Boolean = false,
-    val profilePhotoPath: String = ""
+    val profilePhotoPath: String = "",
+    val profileName: String = "",
+    val notificationEnabled: Boolean = true,
+    val notificationHour: Int = 7,
+    val notificationMinute: Int = 30
 )
 
 class SettingsViewModel(private val storage: SettingsStorage) {
@@ -22,10 +26,14 @@ class SettingsViewModel(private val storage: SettingsStorage) {
     private val _uiState = MutableStateFlow(
         SettingsUiState(
             profilePhotoPath = storage.loadProfilePhoto(),
+            profileName = storage.loadProfileName(),
             language = AppLanguage.entries
                 .firstOrNull { it.code == storage.loadLanguage() }
                 ?: AppLanguage.FRENCH,
-            gender = Gender.entries.firstOrNull { it.key == storage.loadGender() }
+            gender = Gender.entries.firstOrNull { it.key == storage.loadGender() },
+            notificationEnabled = storage.loadNotificationEnabled(),
+            notificationHour = storage.loadNotificationHour(),
+            notificationMinute = storage.loadNotificationMinute()
         )
     )
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
@@ -51,5 +59,21 @@ class SettingsViewModel(private val storage: SettingsStorage) {
     fun setProfilePhoto(path: String) {
         storage.saveProfilePhoto(path)
         _uiState.update { it.copy(profilePhotoPath = path) }
+    }
+
+    fun setProfileName(name: String) {
+        storage.saveProfileName(name)
+        _uiState.update { it.copy(profileName = name) }
+    }
+
+    fun setNotificationEnabled(enabled: Boolean) {
+        storage.saveNotificationEnabled(enabled)
+        _uiState.update { it.copy(notificationEnabled = enabled) }
+    }
+
+    fun setNotificationTime(hour: Int, minute: Int) {
+        storage.saveNotificationHour(hour)
+        storage.saveNotificationMinute(minute)
+        _uiState.update { it.copy(notificationHour = hour, notificationMinute = minute) }
     }
 }

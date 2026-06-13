@@ -6,7 +6,9 @@ import com.closetmixer.domain.model.ArticleCategory
 import com.closetmixer.domain.usecase.AddArticleUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,6 +21,7 @@ data class WardrobeUiState(
     val favorisOnly: Boolean = false,
     val selectedColor: String? = null,
     val availableColors: List<String> = emptyList(),
+    val searchQuery: String = "",
     val isLoading: Boolean = false,
     val error: String? = null
 )
@@ -32,12 +35,13 @@ class WardrobeViewModel(
     val uiState: StateFlow<WardrobeUiState> = _uiState.asStateFlow()
 
     private var baseArticles: List<Article> = emptyList()
+    private var searchJob: Job? = null
 
     init { loadArticles() }
 
     fun loadArticles(category: ArticleCategory? = null) {
         scope.launch {
-            _uiState.update { it.copy(isLoading = true, selectedCategory = category, selectedColor = null, favorisOnly = false) }
+            _uiState.update { it.copy(isLoading = true, selectedCategory = category, selectedColor = null, favorisOnly = false, searchQuery = "") }
             runCatching {
                 if (category == null) articleRepo.getAllArticles()
                 else articleRepo.getByCategory(category)
@@ -47,6 +51,25 @@ class WardrobeViewModel(
                 _uiState.update { it.copy(articles = all, availableColors = colors, isLoading = false) }
             }.onFailure { e ->
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    fun search(query: String) {
+        searchJob?.cancel()
+        _uiState.update { it.copy(searchQuery = query) }
+        if (query.isBlank()) {
+            _uiState.update { state ->
+                state.copy(articles = applyFilters(baseArticles, state.favorisOnly, state.selectedColor))
+            }
+            return
+        }
+        searchJob = scope.launch {
+            delay(300)
+            runCatching { articleRepo.searchArticles(query) }.onSuccess { results ->
+                _uiState.update { state ->
+                    state.copy(articles = applyFilters(results, state.favorisOnly, state.selectedColor))
+                }
             }
         }
     }
