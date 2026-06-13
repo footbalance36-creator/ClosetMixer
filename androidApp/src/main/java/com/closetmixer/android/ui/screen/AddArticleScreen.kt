@@ -1,5 +1,6 @@
 package com.closetmixer.android.ui.screen
 
+import android.app.Activity
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -55,13 +56,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.closetmixer.android.util.copyImageToInternalStorage
+import com.closetmixer.android.util.copyFileToInternalStorage
 import com.closetmixer.domain.model.ArticleCategory
 import com.closetmixer.domain.model.ArticleSubCategory
 import com.closetmixer.domain.model.CulturalStyle
 import com.closetmixer.domain.model.Metal
 import com.closetmixer.presentation.viewmodel.WardrobeViewModel
+import com.yalantis.ucrop.UCrop
 import org.koin.compose.koinInject
+import java.io.File
 import java.util.UUID
 
 data class ColorSwatch(val name: String, val color: Color)
@@ -120,12 +123,38 @@ fun AddArticleScreen(
 
     val subCategories = ArticleSubCategory.entries.filter { it.category == selectedCategory }
 
+    // UCrop result launcher — receives the cropped image
+    val ucropLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val croppedUri = UCrop.getOutput(result.data!!)
+            croppedUri?.path?.let { path ->
+                val croppedFile = File(path)
+                if (croppedFile.exists()) {
+                    photoPath = copyFileToInternalStorage(context, croppedFile)
+                    selectedUri = Uri.parse(photoPath)
+                }
+            }
+        }
+    }
+
+    // Gallery picker — on result, launch UCrop for 3:4 crop
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
         uri?.let {
-            selectedUri = it
-            photoPath = copyImageToInternalStorage(context, it)
+            val destFile = File(context.cacheDir, "crop_${System.currentTimeMillis()}.jpg")
+            val destUri = Uri.fromFile(destFile)
+            val cropIntent = UCrop.of(it, destUri)
+                .withAspectRatio(3f, 4f)
+                .withMaxResultSize(600, 800)
+                .withOptions(UCrop.Options().apply {
+                    setCompressionQuality(85)
+                    setFreeStyleCropEnabled(false)
+                })
+                .getIntent(context)
+            ucropLauncher.launch(cropIntent)
         }
     }
 
@@ -202,7 +231,7 @@ fun AddArticleScreen(
                     }
                 }
 
-                // ── Catégorie (list) ───────────────────────────────────────
+                // ── Catégorie ──────────────────────────────────────────────
                 FormSectionLabel("Catégorie")
                 ExposedDropdownMenuBox(
                     expanded = categoryExpanded,
@@ -236,7 +265,7 @@ fun AddArticleScreen(
                     }
                 }
 
-                // ── Sous-catégorie (list) ──────────────────────────────────
+                // ── Sous-catégorie ─────────────────────────────────────────
                 FormSectionLabel("Sous-catégorie")
                 ExposedDropdownMenuBox(
                     expanded = subCategoryExpanded,
@@ -269,7 +298,7 @@ fun AddArticleScreen(
                     }
                 }
 
-                // ── Couleur (color swatches) ───────────────────────────────
+                // ── Couleur ────────────────────────────────────────────────
                 FormSectionLabel("Couleur${selectedColor?.let { " — ${it.name}" } ?: ""}")
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -304,7 +333,7 @@ fun AddArticleScreen(
                     }
                 }
 
-                // ── Métal (bijoux uniquement, list) ────────────────────────
+                // ── Métal (bijoux uniquement) ──────────────────────────────
                 if (selectedCategory == ArticleCategory.BIJOU) {
                     FormSectionLabel("Métal")
                     ExposedDropdownMenuBox(
@@ -336,7 +365,7 @@ fun AddArticleScreen(
                     }
                 }
 
-                // ── Style culturel (list) ──────────────────────────────────
+                // ── Style culturel ─────────────────────────────────────────
                 FormSectionLabel("Style culturel")
                 ExposedDropdownMenuBox(
                     expanded = cultureExpanded,

@@ -16,8 +16,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
+
+enum class CalendarViewMode { MONTH, WEEK }
 
 data class CalendarUiState(
     val currentMonth: String = "",
@@ -29,7 +32,9 @@ data class CalendarUiState(
     val savedTenues: List<Pair<Tenue, List<Article>>> = emptyList(),
     val isSavedTenuesLoading: Boolean = false,
     val generatedOutfit: GeneratedOutfit? = null,
-    val isGenerating: Boolean = false
+    val isGenerating: Boolean = false,
+    val viewMode: CalendarViewMode = CalendarViewMode.MONTH,
+    val weekStart: String = ""
 )
 
 class CalendarViewModel(
@@ -44,6 +49,7 @@ class CalendarViewModel(
     init {
         val now = Clock.System.todayIn(TimeZone.currentSystemDefault())
         loadMonth("${now.year}-${now.monthNumber.toString().padStart(2, '0')}")
+        initCurrentWeek(now)
     }
 
     fun loadMonth(yearMonth: String) {
@@ -73,6 +79,37 @@ class CalendarViewModel(
         if (month > 12) { month = 1; year++ }
         if (month < 1) { month = 12; year-- }
         loadMonth("$year-${month.toString().padStart(2, '0')}")
+    }
+
+    fun setViewMode(mode: CalendarViewMode) {
+        if (_uiState.value.viewMode == mode) return
+        _uiState.update { it.copy(viewMode = mode) }
+        if (mode == CalendarViewMode.WEEK) {
+            val weekStart = _uiState.value.weekStart
+            if (weekStart.isNotEmpty()) {
+                val yearMonth = weekStart.substring(0, 7)
+                if (yearMonth != _uiState.value.currentMonth) loadMonth(yearMonth)
+            }
+        }
+    }
+
+    fun prevWeek() = shiftWeek(-7)
+    fun nextWeek() = shiftWeek(7)
+
+    private fun shiftWeek(days: Int) {
+        val current = _uiState.value.weekStart.ifEmpty { return }
+        val date = LocalDate.parse(current)
+        val newDate = LocalDate.fromEpochDays(date.toEpochDays() + if (days > 0) 7 else -7)
+        val newWeekStart = newDate.toString()
+        _uiState.update { it.copy(weekStart = newWeekStart) }
+        val yearMonth = newWeekStart.substring(0, 7)
+        if (yearMonth != _uiState.value.currentMonth) loadMonth(yearMonth)
+    }
+
+    private fun initCurrentWeek(today: LocalDate) {
+        val daysFromMonday = today.dayOfWeek.ordinal
+        val monday = LocalDate.fromEpochDays(today.toEpochDays() - daysFromMonday)
+        _uiState.update { it.copy(weekStart = monday.toString()) }
     }
 
     fun selectDate(date: String) {

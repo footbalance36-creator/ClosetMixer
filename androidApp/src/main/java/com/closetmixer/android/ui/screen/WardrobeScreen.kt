@@ -20,15 +20,20 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AddCircleOutline
 import androidx.compose.material.icons.outlined.Checkroom
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -56,144 +61,179 @@ fun WardrobeScreen(
     val state by viewModel.uiState.collectAsState()
     val settings by settingsViewModel.uiState.collectAsState()
 
-    Column(
-        Modifier
-            .fillMaxSize()
-    ) {
-            // ── Stitch-style top bar ───────────────────────────────────────
+    Column(Modifier.fillMaxSize()) {
+        // ── Top bar ────────────────────────────────────────────────────────
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    // Profile photo circle — tap to change
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .border(1.5.dp, MaterialTheme.colorScheme.primaryContainer, CircleShape)
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .clickable { onSettingsClick() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (settings.profilePhotoPath.isNotEmpty()) {
-                            AsyncImage(
-                                model = settings.profilePhotoPath,
-                                contentDescription = "Photo de profil",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        } else {
-                            Icon(
-                                Icons.Outlined.Person,
-                                contentDescription = "Photo de profil",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    }
-                    Text(
-                        text = "Closet Mixer",
-                        style = MaterialTheme.typography.displaySmall,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-                Row {
-                    IconButton(onClick = onSettingsClick) {
-                        Icon(
-                            Icons.Outlined.Settings,
-                            contentDescription = "Paramètres",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(26.dp)
-                        )
-                    }
-                    IconButton(onClick = onAddClick) {
-                        Icon(
-                            Icons.Outlined.AddCircleOutline,
-                            contentDescription = "Ajouter",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(32.dp)
-                        )
-                    }
-                }
-            }
-
-            // ── Category chips ─────────────────────────────────────────────
-            CategoryChips(
-                selected = state.selectedCategory,
-                onSelect = { viewModel.loadArticles(it) }
-            )
-
-            // ── Favoris + couleur chips ────────────────────────────────────
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 20.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(top = 8.dp)
-            ) {
-                item {
-                    StitchChip(
-                        label = "♥ Favoris",
-                        isSelected = state.favorisOnly,
-                        onClick = { viewModel.toggleFavoris() }
-                    )
-                }
-                items(state.availableColors) { color ->
-                    StitchChip(
-                        label = color.replaceFirstChar { it.uppercase() },
-                        isSelected = state.selectedColor == color,
-                        onClick = { viewModel.filterByColor(color) }
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            // ── Content ────────────────────────────────────────────────────
-            when {
-                state.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                }
-
-                state.articles.isEmpty() -> Box(
-                    Modifier.fillMaxSize(),
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .border(1.5.dp, MaterialTheme.colorScheme.primaryContainer, CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .clickable { onSettingsClick() },
                     contentAlignment = Alignment.Center
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            Icons.Outlined.Checkroom,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(48.dp)
+                    if (settings.profilePhotoPath.isNotEmpty()) {
+                        AsyncImage(
+                            model = settings.profilePhotoPath,
+                            contentDescription = "Photo de profil",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
                         )
-                        Spacer(Modifier.height(12.dp))
-                        Text(
-                            "Aucun article dans cette catégorie",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                    } else {
+                        Icon(
+                            Icons.Outlined.Person,
+                            contentDescription = "Photo de profil",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }
-
-                else -> LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 4.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(state.articles) { article ->
-                        ArticleCard(
-                            article = article,
-                            onFavoriteClick = { viewModel.toggleFavorite(article.id) },
-                            onDeleteClick = { viewModel.deleteArticle(article.id) }
-                        )
-                    }
+                Text(
+                    text = "Closet Mixer",
+                    style = MaterialTheme.typography.displaySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+            Row {
+                IconButton(onClick = onSettingsClick) {
+                    Icon(
+                        Icons.Outlined.Settings,
+                        contentDescription = "Paramètres",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(26.dp)
+                    )
+                }
+                IconButton(onClick = onAddClick) {
+                    Icon(
+                        Icons.Outlined.AddCircleOutline,
+                        contentDescription = "Ajouter",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(32.dp)
+                    )
                 }
             }
         }
+
+        // ── Search bar ─────────────────────────────────────────────────────
+        OutlinedTextField(
+            value = state.searchQuery,
+            onValueChange = { viewModel.search(it) },
+            placeholder = { Text("Rechercher…", style = MaterialTheme.typography.bodyMedium) },
+            leadingIcon = {
+                Icon(
+                    Icons.Outlined.Search,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp)
+                )
+            },
+            trailingIcon = {
+                if (state.searchQuery.isNotEmpty()) {
+                    IconButton(onClick = { viewModel.search("") }) {
+                        Icon(
+                            Icons.Outlined.Close,
+                            contentDescription = "Effacer",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+            },
+            singleLine = true,
+            shape = RoundedCornerShape(24.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 4.dp)
+        )
+
+        // ── Category chips ─────────────────────────────────────────────────
+        CategoryChips(
+            selected = state.selectedCategory,
+            onSelect = { viewModel.loadArticles(it) }
+        )
+
+        // ── Favoris + couleur chips ────────────────────────────────────────
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(top = 8.dp)
+        ) {
+            item {
+                StitchChip(
+                    label = "♥ Favoris",
+                    isSelected = state.favorisOnly,
+                    onClick = { viewModel.toggleFavoris() }
+                )
+            }
+            items(state.availableColors) { color ->
+                StitchChip(
+                    label = color.replaceFirstChar { it.uppercase() },
+                    isSelected = state.selectedColor == color,
+                    onClick = { viewModel.filterByColor(color) }
+                )
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        // ── Content ────────────────────────────────────────────────────────
+        when {
+            state.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            }
+
+            state.articles.isEmpty() -> Box(
+                Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        Icons.Outlined.Checkroom,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(48.dp)
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        if (state.searchQuery.isNotEmpty()) "Aucun résultat pour \"${state.searchQuery}\""
+                        else "Aucun article dans cette catégorie",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            else -> LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(state.articles) { article ->
+                    ArticleCard(
+                        article = article,
+                        onFavoriteClick = { viewModel.toggleFavorite(article.id) },
+                        onDeleteClick = { viewModel.deleteArticle(article.id) }
+                    )
+                }
+            }
+        }
+    }
 }

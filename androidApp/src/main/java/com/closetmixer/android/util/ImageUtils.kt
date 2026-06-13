@@ -19,6 +19,15 @@ fun copyImageToInternalStorage(context: Context, uri: Uri): String {
     return file.absolutePath
 }
 
+fun copyFileToInternalStorage(context: Context, source: File): String {
+    val dir = File(context.filesDir, "articles")
+    dir.mkdirs()
+    val dest = File(dir, "article_${System.currentTimeMillis()}.jpg")
+    source.copyTo(dest, overwrite = true)
+    source.delete()
+    return dest.absolutePath
+}
+
 fun shareOutfit(context: Context, outfit: GeneratedOutfit) {
     val photoPaths = listOfNotNull(
         outfit.haut?.photoPath,

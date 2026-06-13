@@ -92,6 +92,12 @@ dependencies {
     // Google Play In-App Review
     implementation(libs.play.review)
 
+    // WorkManager
+    implementation(libs.androidx.work.runtime)
+
+    // UCrop
+    implementation(libs.ucrop)
+
     // Moko
     implementation(libs.moko.resources.compose)
 }

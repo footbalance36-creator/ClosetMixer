@@ -1,7 +1,9 @@
 package com.closetmixer.android.ui.screen
 
 import android.app.Activity
+import android.app.TimePickerDialog
 import android.net.Uri
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -31,18 +33,25 @@ import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Logout
+import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.Style
+import androidx.compose.material.icons.outlined.Timer
 import androidx.core.os.LocaleListCompat
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,6 +67,8 @@ import com.closetmixer.android.ui.component.StitchChip
 import com.closetmixer.android.util.copyImageToInternalStorage
 import com.closetmixer.android.util.openPlayStorePage
 import com.closetmixer.android.util.requestInAppReview
+import com.closetmixer.android.worker.cancelOutfitReminder
+import com.closetmixer.android.worker.scheduleOutfitReminder
 import com.closetmixer.domain.model.AppLanguage
 import com.closetmixer.domain.model.CulturalStyle
 import com.closetmixer.domain.model.Gender
@@ -82,6 +93,38 @@ fun SettingsScreen(viewModel: SettingsViewModel = koinInject()) {
     val state by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val activity = context as? Activity
+
+    var showTimePicker by remember { mutableStateOf(false) }
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            viewModel.setNotificationEnabled(true)
+            scheduleOutfitReminder(context, state.notificationHour, state.notificationMinute, forceUpdate = true)
+        }
+    }
+
+    if (showTimePicker) {
+        DisposableEffect(Unit) {
+            val dialog = TimePickerDialog(
+                context,
+                { _, hour, minute ->
+                    viewModel.setNotificationTime(hour, minute)
+                    if (state.notificationEnabled) {
+                        scheduleOutfitReminder(context, hour, minute, forceUpdate = true)
+                    }
+                    showTimePicker = false
+                },
+                state.notificationHour,
+                state.notificationMinute,
+                true
+            )
+            dialog.setOnDismissListener { showTimePicker = false }
+            dialog.show()
+            onDispose { dialog.dismiss() }
+        }
+    }
 
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -158,7 +201,10 @@ fun SettingsScreen(viewModel: SettingsViewModel = koinInject()) {
                     }
                 }
                 Spacer(Modifier.height(12.dp))
-                Text("Elena Rossi", style = MaterialTheme.typography.headlineSmall)
+                Text(
+                    state.profileName.ifEmpty { "Mon Profil" },
+                    style = MaterialTheme.typography.headlineSmall
+                )
                 Text(
                     "MEMBRE PREMIUM",
                     style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 1.5.sp),
@@ -220,6 +266,48 @@ fun SettingsScreen(viewModel: SettingsViewModel = koinInject()) {
                         .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                         .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
                 ) {
+                    // Notifications
+                    SettingsRow(
+                        icon = Icons.Outlined.NotificationsNone,
+                        title = "Notification tenue du jour",
+                        hasDivider = true
+                    ) {
+                        Switch(
+                            checked = state.notificationEnabled,
+                            onCheckedChange = { enabled ->
+                                if (enabled) {
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                        notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                                    } else {
+                                        viewModel.setNotificationEnabled(true)
+                                        scheduleOutfitReminder(context, state.notificationHour, state.notificationMinute, forceUpdate = true)
+                                    }
+                                } else {
+                                    viewModel.setNotificationEnabled(false)
+                                    cancelOutfitReminder(context)
+                                }
+                            }
+                        )
+                    }
+
+                    // Notification time
+                    if (state.notificationEnabled) {
+                        SettingsRow(
+                            icon = Icons.Outlined.Timer,
+                            title = "Heure du rappel — %02d:%02d".format(state.notificationHour, state.notificationMinute),
+                            hasDivider = true
+                        ) {
+                            Icon(
+                                Icons.Outlined.ChevronRight,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .clickable { showTimePicker = true }
+                            )
+                        }
+                    }
+
                     // Dark mode
                     SettingsRow(
                         icon = Icons.Outlined.DarkMode,
@@ -231,6 +319,32 @@ fun SettingsScreen(viewModel: SettingsViewModel = koinInject()) {
                             onCheckedChange = { viewModel.toggleDarkMode() }
                         )
                     }
+
+                    // Profile name
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = state.profileName,
+                            onValueChange = { viewModel.setProfileName(it) },
+                            label = { Text("Nom du profil", style = MaterialTheme.typography.bodySmall) },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Outlined.Person,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.secondary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            },
+                            singleLine = true,
+                            shape = RoundedCornerShape(10.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
 
                     // Gender picker
                     Column(

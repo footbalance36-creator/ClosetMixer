@@ -28,9 +28,41 @@ class AndroidSettingsStorage(context: Context) : SettingsStorage {
     override fun loadGender(): String =
         prefs.getString(KEY_GENDER, "") ?: ""
 
+    override fun saveProfileName(name: String) {
+        prefs.edit().putString(KEY_PROFILE_NAME, name).apply()
+    }
+
+    override fun loadProfileName(): String =
+        prefs.getString(KEY_PROFILE_NAME, "") ?: ""
+
+    override fun saveNotificationEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_NOTIF_ENABLED, enabled).apply()
+    }
+
+    override fun loadNotificationEnabled(): Boolean =
+        prefs.getBoolean(KEY_NOTIF_ENABLED, true)
+
+    override fun saveNotificationHour(hour: Int) {
+        prefs.edit().putInt(KEY_NOTIF_HOUR, hour).apply()
+    }
+
+    override fun loadNotificationHour(): Int =
+        prefs.getInt(KEY_NOTIF_HOUR, 7)
+
+    override fun saveNotificationMinute(minute: Int) {
+        prefs.edit().putInt(KEY_NOTIF_MINUTE, minute).apply()
+    }
+
+    override fun loadNotificationMinute(): Int =
+        prefs.getInt(KEY_NOTIF_MINUTE, 30)
+
     companion object {
         private const val KEY_PROFILE_PHOTO = "profile_photo_path"
         private const val KEY_LANGUAGE = "app_language"
         private const val KEY_GENDER = "app_gender"
+        private const val KEY_PROFILE_NAME = "profile_name"
+        private const val KEY_NOTIF_ENABLED = "notification_enabled"
+        private const val KEY_NOTIF_HOUR = "notification_hour"
+        private const val KEY_NOTIF_MINUTE = "notification_minute"
     }
 }

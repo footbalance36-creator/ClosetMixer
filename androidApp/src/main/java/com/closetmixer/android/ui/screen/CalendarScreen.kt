@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -50,6 +51,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -60,7 +62,9 @@ import com.closetmixer.data.model.Article
 import com.closetmixer.data.model.CalendarEntry
 import com.closetmixer.data.model.Tenue
 import com.closetmixer.domain.usecase.GeneratedOutfit
+import com.closetmixer.presentation.viewmodel.CalendarUiState
 import com.closetmixer.presentation.viewmodel.CalendarViewModel
+import com.closetmixer.presentation.viewmodel.CalendarViewMode
 import org.koin.compose.koinInject
 import java.time.LocalDate
 import java.time.YearMonth
@@ -120,6 +124,7 @@ fun CalendarScreen(viewModel: CalendarViewModel = koinInject()) {
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
+        // ── Header: titre + navigation ─────────────────────────────────────
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -133,115 +138,172 @@ fun CalendarScreen(viewModel: CalendarViewModel = koinInject()) {
                 modifier = Modifier.padding(start = 12.dp)
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = { viewModel.prevMonth() }) {
+                IconButton(onClick = {
+                    if (state.viewMode == CalendarViewMode.WEEK) viewModel.prevWeek()
+                    else viewModel.prevMonth()
+                }) {
                     Icon(
                         Icons.Default.KeyboardArrowLeft,
-                        contentDescription = "Mois précédent",
+                        contentDescription = "Précédent",
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
                 Text(
-                    yearMonth.month.getDisplayName(TextStyle.FULL, Locale.FRENCH)
+                    if (state.viewMode == CalendarViewMode.WEEK) weekRangeLabel(state)
+                    else yearMonth.month.getDisplayName(TextStyle.FULL, Locale.FRENCH)
                         .replaceFirstChar { it.uppercase() } + " ${yearMonth.year}",
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary
                 )
-                IconButton(onClick = { viewModel.nextMonth() }) {
+                IconButton(onClick = {
+                    if (state.viewMode == CalendarViewMode.WEEK) viewModel.nextWeek()
+                    else viewModel.nextMonth()
+                }) {
                     Icon(
                         Icons.Default.KeyboardArrowRight,
-                        contentDescription = "Mois suivant",
+                        contentDescription = "Suivant",
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
         }
 
+        // ── Toggle Mois / Semaine ──────────────────────────────────────────
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp),
-            horizontalArrangement = Arrangement.SpaceAround
+                .padding(horizontal = 20.dp, vertical = 4.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
         ) {
-            listOf("D", "L", "M", "M", "J", "V", "S").forEach { label ->
-                Text(
-                    label,
-                    style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.sp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.60f),
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center
-                )
+            listOf("Mois" to CalendarViewMode.MONTH, "Semaine" to CalendarViewMode.WEEK).forEach { (label, mode) ->
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            if (state.viewMode == mode) MaterialTheme.colorScheme.primaryContainer
+                            else Color.Transparent
+                        )
+                        .clickable { viewModel.setViewMode(mode) }
+                        .padding(vertical = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        label,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = if (state.viewMode == mode) MaterialTheme.colorScheme.onPrimaryContainer
+                        else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
 
         Spacer(Modifier.height(8.dp))
 
-        val cells = buildList {
-            repeat(firstDayOfWeek) { add(0) }
-            addAll(1..daysInMonth)
-        }
+        if (state.viewMode == CalendarViewMode.MONTH) {
+            // ── En-têtes jours semaine ─────────────────────────────────────
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                listOf("D", "L", "M", "M", "J", "V", "S").forEach { label ->
+                    Text(
+                        label,
+                        style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.60f),
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(7),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(((cells.size / 7 + 1) * 48).dp)
-                .padding(horizontal = 12.dp),
-            userScrollEnabled = false
-        ) {
-            items(cells) { day ->
-                if (day == 0) {
-                    Box(Modifier.aspectRatio(1f))
-                } else {
-                    val isSelected = day == selectedDay
-                    val isToday = isCurrentMonth && day == today.dayOfMonth
-                    val hasEntry = day in plannedDays
+            Spacer(Modifier.height(8.dp))
 
-                    Box(
-                        modifier = Modifier
-                            .aspectRatio(1f)
-                            .padding(2.dp)
-                            .clip(CircleShape)
-                            .then(
-                                if (isSelected) Modifier.background(
-                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
-                                ) else Modifier
-                            )
-                            .clickable {
-                                selectedDay = day
-                                val dateStr = "${state.currentMonth}-${day.toString().padStart(2, '0')}"
-                                viewModel.selectDate(dateStr)
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                day.toString(),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = when {
-                                    isToday -> MaterialTheme.colorScheme.primary
-                                    isSelected -> MaterialTheme.colorScheme.onPrimaryContainer
-                                    else -> MaterialTheme.colorScheme.onSurface
-                                },
-                                textAlign = TextAlign.Center
-                            )
-                            if (hasEntry) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(4.dp)
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.primary)
+            val cells = buildList {
+                repeat(firstDayOfWeek) { add(0) }
+                addAll(1..daysInMonth)
+            }
+
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(7),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(((cells.size / 7 + 1) * 48).dp)
+                    .padding(horizontal = 12.dp),
+                userScrollEnabled = false
+            ) {
+                items(cells) { day ->
+                    if (day == 0) {
+                        Box(Modifier.aspectRatio(1f))
+                    } else {
+                        val isSelected = day == selectedDay
+                        val isToday = isCurrentMonth && day == today.dayOfMonth
+                        val hasEntry = day in plannedDays
+
+                        Box(
+                            modifier = Modifier
+                                .aspectRatio(1f)
+                                .padding(2.dp)
+                                .clip(CircleShape)
+                                .then(
+                                    if (isSelected) Modifier.background(
+                                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
+                                    ) else Modifier
                                 )
+                                .clickable {
+                                    selectedDay = day
+                                    val dateStr = "${state.currentMonth}-${day.toString().padStart(2, '0')}"
+                                    viewModel.selectDate(dateStr)
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    day.toString(),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = when {
+                                        isToday -> MaterialTheme.colorScheme.primary
+                                        isSelected -> MaterialTheme.colorScheme.onPrimaryContainer
+                                        else -> MaterialTheme.colorScheme.onSurface
+                                    },
+                                    textAlign = TextAlign.Center
+                                )
+                                if (hasEntry) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(4.dp)
+                                            .clip(CircleShape)
+                                            .background(MaterialTheme.colorScheme.primary)
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
+        } else {
+            // ── Vue Semaine ────────────────────────────────────────────────
+            WeekView(
+                weekStart = state.weekStart,
+                monthEntries = state.monthEntries,
+                selectedDate = state.selectedDate,
+                onDayClick = { dateStr -> viewModel.selectDate(dateStr) }
+            )
         }
 
         Spacer(Modifier.height(16.dp))
 
-        selectedDay?.let { day ->
-            val dateStr = "${state.currentMonth}-${day.toString().padStart(2, '0')}"
+        // ── Panel jour sélectionné ─────────────────────────────────────────
+        val activeDateStr = if (state.viewMode == CalendarViewMode.MONTH) {
+            selectedDay?.let { day -> "${state.currentMonth}-${day.toString().padStart(2, '0')}" }
+        } else {
+            state.selectedDate
+        }
+
+        activeDateStr?.let { dateStr ->
             val entry = state.monthEntries[dateStr]
             SelectedDayPanel(
                 dateLabel = formatDate(dateStr),
@@ -278,6 +340,93 @@ fun CalendarScreen(viewModel: CalendarViewModel = koinInject()) {
         }
 
         Spacer(Modifier.height(32.dp))
+    }
+}
+
+@Composable
+private fun WeekView(
+    weekStart: String,
+    monthEntries: Map<String, Pair<CalendarEntry, List<Article>>>,
+    selectedDate: String?,
+    onDayClick: (String) -> Unit
+) {
+    if (weekStart.isEmpty()) return
+
+    val weekDates = remember(weekStart) {
+        val start = LocalDate.parse(weekStart)
+        (0 until 7).map { i -> start.plusDays(i.toLong()).toString() }
+    }
+    val dayNames = listOf("Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim")
+    val todayStr = LocalDate.now().toString()
+
+    LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        weekDates.forEachIndexed { index, dateStr ->
+            item(key = dateStr) {
+                val entry = monthEntries[dateStr]
+                val isToday = dateStr == todayStr
+                val isSelected = dateStr == selectedDate
+                val dayNumber = dateStr.substring(8).toIntOrNull() ?: 0
+                val firstArticle = entry?.second?.firstOrNull()
+
+                Column(
+                    modifier = Modifier
+                        .width(72.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            when {
+                                isSelected -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                                else -> MaterialTheme.colorScheme.surfaceVariant
+                            }
+                        )
+                        .clickable { onDayClick(dateStr) }
+                        .padding(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        dayNames[index],
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        dayNumber.toString(),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = if (isToday) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onSurface
+                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(3f / 4f)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.surface)
+                    ) {
+                        if (firstArticle != null) {
+                            AsyncImage(
+                                model = firstArticle.photoPath,
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } else {
+                            Icon(
+                                Icons.Default.Add,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.outline,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .size(16.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -554,6 +703,17 @@ private fun GenerateOutfitTab(
             }
         }
     }
+}
+
+private fun weekRangeLabel(state: CalendarUiState): String {
+    if (state.weekStart.isEmpty()) return ""
+    return runCatching {
+        val start = LocalDate.parse(state.weekStart)
+        val end = start.plusDays(6)
+        val startFmt = DateTimeFormatter.ofPattern("d MMM", Locale.FRENCH)
+        val endFmt = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.FRENCH)
+        "${start.format(startFmt)} – ${end.format(endFmt)}"
+    }.getOrElse { state.weekStart }
 }
 
 private fun formatDate(dateStr: String): String =
